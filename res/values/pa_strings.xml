@@ -18,4 +18,15 @@
     <!-- Grid -->
     <string name="pref_grid_title">Grid</string>
     <string name="pref_grid_default" translatable="false">off</string>
+
+    <!-- Touch focus duration -->
+    <string name="pref_camera_focustime_title">Touch focus duration</string>
+    <string name="pref_camera_focustime_default" translatable="false">5000</string>
+
+    <string name="pref_camera_focustime_entry_5">5s</string>
+    <string name="pref_camera_focustime_entry_10">10s</string>
+    <string name="pref_camera_focustime_entry_15">15s</string>
+    <string name="pref_camera_focustime_entry_20">20s</string>
+    <string name="pref_camera_focustime_entry_30">30s</string>
+    <string name="pref_camera_focustime_entry_infinite">Infinite</string>
 </resources>
