@@ -67,6 +67,7 @@ public class OneUICameraControls extends RotatableLayout {
 
     private static final int WIDTH_GRID = 5;
     private static final int HEIGHT_GRID = 7;
+    private boolean mAnimating = false;
     private View[] mViews;
     private boolean mHideRemainingPhoto = false;
     private LinearLayout mRemainingPhotos;
@@ -127,6 +128,10 @@ public class OneUICameraControls extends RotatableLayout {
 
     public OneUICameraControls(Context context) {
         this(context, null);
+    }
+
+    public boolean isAnimating() {
+        return mAnimating;
     }
 
     public void setIntentMode(int mode) {

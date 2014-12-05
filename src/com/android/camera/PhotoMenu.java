@@ -51,7 +51,6 @@ import android.widget.FrameLayout.LayoutParams;
 import com.android.camera.CameraPreference.OnPreferenceChangedListener;
 import com.android.camera.TsMakeupManager.MakeupLevelListener;
 import com.android.camera.app.CameraApp;
-import com.android.camera.ui.CameraControls;
 import com.android.camera.ui.CountdownTimerPopup;
 import com.android.camera.ui.ListSubMenu;
 import com.android.camera.ui.ListMenu;
@@ -1246,7 +1245,7 @@ public class PhotoMenu extends MenuController
     }
 
     public void openFirstLevel() {
-        if (isMenuBeingShown() || CameraControls.isAnimating()) {
+        if (isMenuBeingShown() || mUI.isCameraControlsAnimating()) {
             return;
         }
         if(TsMakeupManager.HAS_TS_MAKEUP) {
