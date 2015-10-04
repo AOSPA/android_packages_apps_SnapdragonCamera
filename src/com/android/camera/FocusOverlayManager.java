@@ -294,6 +294,9 @@ public class FocusOverlayManager {
             // sound.
             if (focused) {
                 mState = STATE_SUCCESS;
+                // Lock exposure and white balance
+                setAeAwbLock(true);
+                mListener.setFocusParameters();
             } else {
                 mState = STATE_FAIL;
             }
@@ -305,6 +308,9 @@ public class FocusOverlayManager {
             // take the picture now.
             if (focused) {
                 mState = STATE_SUCCESS;
+                // Lock exposure and white balance
+                setAeAwbLock(true);
+                mListener.setFocusParameters();
             } else {
                 mState = STATE_FAIL;
             }
@@ -459,6 +465,7 @@ public class FocusOverlayManager {
         // Otherwise, focus mode stays at auto and the tap area passed to the
         // driver is not reset.
         resetTouchFocus();
+        setAeAwbLock(false);
         mListener.cancelAutoFocus();
         mUI.resumeFaceDetection();
         mState = STATE_IDLE;
