@@ -964,6 +964,8 @@ public class PhotoModule
             return;
         }
 
+        mApplicationContext = CameraApp.getContext();
+
         // Initialize location service.
         boolean recordLocation = RecordLocationPreference.get(mPreferences,
                 CameraSettings.KEY_RECORD_LOCATION);
@@ -1438,7 +1440,20 @@ public class PhotoModule
                     && (mCameraState != LONGSHOT)
                     && (mSnapshotMode != CameraInfo.CAMERA_SUPPORT_MODE_ZSL)
                     && (mReceivedSnapNum == mBurstSnapNum);
+
             needRestartPreview |= mLgeHdrMode;
+
+            boolean backCameraRestartPreviewOnPictureTaken =
+                mApplicationContext.getResources().getBoolean(R.bool.back_camera_restart_preview_onPictureTaken);
+            boolean frontCameraRestartPreviewOnPictureTaken =
+                mApplicationContext.getResources().getBoolean(R.bool.front_camera_restart_preview_onPictureTaken);
+
+            CameraInfo info = CameraHolder.instance().getCameraInfo()[mCameraId];
+            if ((info.facing == CameraInfo.CAMERA_FACING_BACK && backCameraRestartPreviewOnPictureTaken)
+                || (info.facing == CameraInfo.CAMERA_FACING_FRONT && frontCameraRestartPreviewOnPictureTaken)) {
+                needRestartPreview = true;
+            }
+
             if (needRestartPreview) {
                 mHandler.post(() -> {
                     setupPreview();
