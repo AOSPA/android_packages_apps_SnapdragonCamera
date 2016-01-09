@@ -168,6 +168,9 @@ public class CameraSettings {
     public static final String KEY_QC_NOISE_REDUCTION_MODE = "noise-reduction-mode";
     public static final String KEY_QC_INSTANT_CAPTURE = "instant-capture";
 
+    public static final String LGE_HDR_MODE_OFF = "0";
+    public static final String LGE_HDR_MODE_ON = "1";
+
     public static final String KEY_INTERNAL_PREVIEW_RESTART = "internal-restart";
     public static final String KEY_QC_ZSL_HDR_SUPPORTED = "zsl-hdr-supported";
     public static final String KEY_QC_LONGSHOT_SUPPORTED = "longshot-supported";
