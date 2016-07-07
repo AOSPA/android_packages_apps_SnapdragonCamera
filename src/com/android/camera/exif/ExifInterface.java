@@ -19,6 +19,7 @@ package com.android.camera.exif;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.SparseIntArray;
+import android.os.Build;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -1977,6 +1978,23 @@ public class ExifInterface {
         return true;
     }
 
+    public boolean addOrientationTag(int orientation) {
+        int value = Orientation.TOP_LEFT;
+        if(orientation == 90) {
+            value = Orientation.RIGHT_TOP;
+        } else if(orientation == 180) {
+            value = Orientation.BOTTOM_LEFT;
+        } else if(orientation == 270) {
+            value = Orientation.RIGHT_BOTTOM;
+        }
+        ExifTag t = buildTag(TAG_ORIENTATION, value);
+        if (t == null) {
+            return false;
+        }
+        setTag(t);
+        return true;
+    }
+
     /**
      * Creates and sets all to the GPS tags for a give latitude and longitude.
      *
@@ -2027,6 +2045,21 @@ public class ExifInterface {
         setTag(t);
         return true;
     }
+
+    public boolean addMakeAndModelTag() {
+        ExifTag t = buildTag(TAG_MAKE, Build.MANUFACTURER);
+        if (t == null) {
+            return false;
+        }
+        setTag(t);
+        t = buildTag(TAG_MODEL, Build.MODEL);
+        if (t == null) {
+            return false;
+        }
+        setTag(t);
+        return true;
+    }
+
 
     private static Rational[] toExifLatLong(double value) {
         // convert to the format dd/1 mm/1 ssss/100

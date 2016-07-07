@@ -767,8 +767,7 @@ public class PhotoUI implements PieListener,
         // make sure the correct value was found
         // otherwise use auto index
         mOnScreenIndicators.updateWBIndicator(wbIndex < 0 ? 2 : wbIndex);
-        boolean location = RecordLocationPreference.get(
-                prefs, mActivity.getContentResolver());
+        boolean location = RecordLocationPreference.get(prefs);
         mOnScreenIndicators.updateLocationIndicator(location);
     }
 
@@ -1068,7 +1067,9 @@ public class PhotoUI implements PieListener,
         mReviewImage.setVisibility(View.GONE);
         mOnScreenIndicators.setVisibility(View.VISIBLE);
         mMenuButton.setVisibility(View.VISIBLE);
-        mMenu.hideTopMenu(false);
+        if (mMenu != null) {
+            mMenu.hideTopMenu(false);
+        }
         CameraUtil.fadeOut(mReviewDoneButton);
         mShutterButton.setVisibility(View.VISIBLE);
         CameraUtil.fadeOut(mReviewRetakeButton);
