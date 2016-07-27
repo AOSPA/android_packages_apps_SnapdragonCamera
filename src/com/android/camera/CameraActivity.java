@@ -733,7 +733,8 @@ public class CameraActivity extends Activity
     public void updateThumbnail(boolean videoOnly) {
         // Only handle OnDataInserted if it's video.
         // Photo and Panorama have their own way of updating thumbnail.
-        if (!videoOnly || (mCurrentModule instanceof VideoModule)) {
+        if (!videoOnly || (mCurrentModule instanceof VideoModule) ||
+                ((mCurrentModule instanceof CaptureModule) && videoOnly)) {
             (new UpdateThumbnailTask(null, true)).execute();
         }
     }
@@ -1648,12 +1649,11 @@ public class CameraActivity extends Activity
 
         if (checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED &&
                 checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED &&
-                checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+                checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
             mHasCriticalPermissions = true;
         } else {
             mHasCriticalPermissions = false;
         }
-
         if ((checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) ||
                 !mHasCriticalPermissions) {
             final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -1744,7 +1744,10 @@ public class CameraActivity extends Activity
             mWakeLock.release();
             Log.d(TAG, "wake lock release");
         }
-        SettingsManager.getInstance().destroyInstance();
+        SettingsManager settingsMngr = SettingsManager.getInstance();
+        if (settingsMngr != null) {
+            settingsMngr.destroyInstance();
+        }
         if (mCursor != null) {
             getContentResolver().unregisterContentObserver(mLocalImagesObserver);
             getContentResolver().unregisterContentObserver(mLocalVideosObserver);
