@@ -767,8 +767,7 @@ public class PhotoUI implements PieListener,
         // make sure the correct value was found
         // otherwise use auto index
         mOnScreenIndicators.updateWBIndicator(wbIndex < 0 ? 2 : wbIndex);
-        boolean location = RecordLocationPreference.get(
-                prefs, mActivity.getContentResolver());
+        boolean location = RecordLocationPreference.get(prefs);
         mOnScreenIndicators.updateLocationIndicator(location);
     }
 
@@ -1068,7 +1067,9 @@ public class PhotoUI implements PieListener,
         mReviewImage.setVisibility(View.GONE);
         mOnScreenIndicators.setVisibility(View.VISIBLE);
         mMenuButton.setVisibility(View.VISIBLE);
-        mMenu.hideTopMenu(false);
+        if (mMenu != null) {
+            mMenu.hideTopMenu(false);
+        }
         CameraUtil.fadeOut(mReviewDoneButton);
         mShutterButton.setVisibility(View.VISIBLE);
         CameraUtil.fadeOut(mReviewRetakeButton);
@@ -1444,16 +1445,12 @@ public class PhotoUI implements PieListener,
             AlertDialog dialog = new AlertDialog.Builder(mActivity)
                 .setTitle(R.string.refocus_prompt_title)
                 .setMessage(R.string.refocus_prompt_message)
-                .setPositiveButton(R.string.dialog_ok,
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int arg1) {
-                                SharedPreferences.Editor editor = prefs.edit();
-                                editor.putInt(CameraSettings.KEY_REFOCUS_PROMPT, 0);
-                                editor.apply();
-                            }
-                        })
+                .setPositiveButton(R.string.dialog_ok, null)
                 .show();
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.putInt(CameraSettings.KEY_REFOCUS_PROMPT, 0);
+                editor.apply();
+
         }
     }
 

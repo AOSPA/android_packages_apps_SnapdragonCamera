@@ -315,7 +315,13 @@ public class VideoModule implements CameraModule,
 
         VIDEO_ENCODER_TABLE.put("h263", MediaRecorder.VideoEncoder.H263);
         VIDEO_ENCODER_TABLE.put("h264", MediaRecorder.VideoEncoder.H264);
-        // VIDEO_ENCODER_TABLE.put("h265", MediaRecorder.VideoEncoder.H265);
+        int h265 = ApiHelper.getIntFieldIfExists(MediaRecorder.VideoEncoder.class,
+                       "HEVC", null, MediaRecorder.VideoEncoder.DEFAULT);
+        if (h265 == MediaRecorder.VideoEncoder.DEFAULT) {
+            h265 = ApiHelper.getIntFieldIfExists(MediaRecorder.VideoEncoder.class,
+                       "H265", null, MediaRecorder.VideoEncoder.DEFAULT);
+        }
+        VIDEO_ENCODER_TABLE.put("h265", h265);
         VIDEO_ENCODER_TABLE.put("m4v", MediaRecorder.VideoEncoder.MPEG_4_SP);
         VIDEO_ENCODER_TABLE.putDefault(MediaRecorder.VideoEncoder.DEFAULT);
 
@@ -447,7 +453,11 @@ public class VideoModule implements CameraModule,
     }
 
     public void reinit() {
-        mPreferences = new ComboPreferences(mActivity);
+        mPreferences = ComboPreferences.get(mActivity);
+        if (mPreferences == null) {
+            mPreferences = new ComboPreferences(mActivity);
+        }
+
         CameraSettings.upgradeGlobalPreferences(mPreferences.getGlobal(), mActivity);
         mCameraId = getPreferredCameraId(mPreferences);
         mPreferences.setLocalId(mActivity, mCameraId);
@@ -458,7 +468,11 @@ public class VideoModule implements CameraModule,
     public void init(CameraActivity activity, View root) {
         mActivity = activity;
         mUI = new VideoUI(activity, this, root);
-        mPreferences = new ComboPreferences(mActivity);
+        mPreferences = ComboPreferences.get(mActivity);
+        if (mPreferences == null) {
+            mPreferences = new ComboPreferences(mActivity);
+        }
+
         CameraSettings.upgradeGlobalPreferences(mPreferences.getGlobal(), activity);
         mCameraId = getPreferredCameraId(mPreferences);
 
@@ -1106,8 +1120,7 @@ public class VideoModule implements CameraModule,
 
         mOrientationManager.resume();
         // Initialize location service.
-        boolean recordLocation = RecordLocationPreference.get(mPreferences,
-                mContentResolver);
+        boolean recordLocation = RecordLocationPreference.get(mPreferences);
         mLocationManager.recordLocation(recordLocation);
 
         if (mPreviewing) {
@@ -1487,6 +1500,10 @@ public class VideoModule implements CameraModule,
         mProfile.audioCodec = mAudioEncoder;
         mProfile.duration = mMaxVideoDurationInMs;
 
+        if ((mProfile.audioCodec == MediaRecorder.AudioEncoder.AMR_NB) &&
+            !mCaptureTimeLapse && !isHFR) {
+            mProfile.fileFormat = MediaRecorder.OutputFormat.THREE_GPP;
+        }
         // Set params individually for HFR case, as we do not want to encode audio
         if ((isHFR || isHSR) && captureRate > 0) {
             if (isHSR) {
@@ -1531,7 +1548,7 @@ public class VideoModule implements CameraModule,
 
             // Profiles advertizes bitrate corresponding to published framerate.
             // In case framerate is different, scale the bitrate
-            int scaledBitrate = mProfile.videoBitRate * targetFrameRate / mProfile.videoFrameRate;
+            int scaledBitrate = mProfile.videoBitRate * (targetFrameRate / mProfile.videoFrameRate);
             Log.i(TAG, "Scaled Video bitrate : " + scaledBitrate);
             mMediaRecorder.setVideoEncodingBitRate(scaledBitrate);
         }
@@ -2701,8 +2718,7 @@ public class VideoModule implements CameraModule,
             // startPreview().
             if (mCameraDevice == null) return;
 
-            boolean recordLocation = RecordLocationPreference.get(
-                    mPreferences, mContentResolver);
+            boolean recordLocation = RecordLocationPreference.get(mPreferences);
             mLocationManager.recordLocation(recordLocation);
 
             readVideoPreferences();

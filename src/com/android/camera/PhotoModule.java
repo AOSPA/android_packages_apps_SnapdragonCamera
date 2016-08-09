@@ -548,7 +548,10 @@ public class PhotoModule
     }
 
     public void reinit() {
-        mPreferences = new ComboPreferences(mActivity);
+        mPreferences = ComboPreferences.get(mActivity);
+        if (mPreferences == null) {
+            mPreferences = new ComboPreferences(mActivity);
+        }
         CameraSettings.upgradeGlobalPreferences(mPreferences.getGlobal(), mActivity);
         mCameraId = getPreferredCameraId(mPreferences);
         mPreferences.setLocalId(mActivity, mCameraId);
@@ -559,7 +562,11 @@ public class PhotoModule
     public void init(CameraActivity activity, View parent) {
         mActivity = activity;
         mRootView = parent;
-        mPreferences = new ComboPreferences(mActivity);
+        mPreferences = ComboPreferences.get(mActivity);
+        if (mPreferences == null) {
+            mPreferences = new ComboPreferences(mActivity);
+        }
+
         CameraSettings.upgradeGlobalPreferences(mPreferences.getGlobal(), activity);
         mCameraId = getPreferredCameraId(mPreferences);
         mContentResolver = mActivity.getContentResolver();
@@ -890,8 +897,7 @@ public class PhotoModule
         }
 
         // Initialize location service.
-        boolean recordLocation = RecordLocationPreference.get(
-                mPreferences, mContentResolver);
+        boolean recordLocation = RecordLocationPreference.get(mPreferences);
         mLocationManager.recordLocation(recordLocation);
 
         mUI.initializeFirstTime();
@@ -922,8 +928,7 @@ public class PhotoModule
     // onResume.
     private void initializeSecondTime() {
         // Start location update if needed.
-        boolean recordLocation = RecordLocationPreference.get(
-                mPreferences, mContentResolver);
+        boolean recordLocation = RecordLocationPreference.get(mPreferences);
         mLocationManager.recordLocation(recordLocation);
         MediaSaveService s = mActivity.getMediaSaveService();
         if (s != null) {
@@ -2854,12 +2859,6 @@ public class PhotoModule
         }
         mErrorCallback.setActivity(mActivity);
         mCameraDevice.setErrorCallback(mErrorCallback);
-        // ICS camera frameworks has a bug. Face detection state is not cleared 1589
-        // after taking a picture. Stop the preview to work around it. The bug
-        // was fixed in JB.
-        if (mCameraState != PREVIEW_STOPPED && mCameraState != INIT) {
-            stopPreview();
-        }
 
         if (mFocusManager == null) initializeFocusManager();
 
@@ -2959,10 +2958,10 @@ public class PhotoModule
                 CameraSettings.KEY_INSTANT_CAPTURE,
                 mActivity.getString(R.string.pref_camera_instant_capture_default));
         if (instantCapture.equals(mActivity.getString(
-                R.string.pref_camera_instant_capture_value_enable))) {
-            return true;
+                R.string.pref_camera_instant_capture_value_disable))) {
+            return false;
         }
-        return false;
+        return true;
     }
 
     private void qcomUpdateAdvancedFeatures(String ubiFocus,
@@ -3245,23 +3244,6 @@ public class PhotoModule
             mParameters.set(CameraSettings.KEY_SNAPCAM_HDR_NEED_1X, hdrNeed1x);
         }
 
-        // Set Instant Capture
-        String instantCapture = mPreferences.getString(
-                CameraSettings.KEY_INSTANT_CAPTURE,
-                mActivity.getString(R.string.pref_camera_instant_capture_default));
-
-        if (instantCapture.equals(mActivity.getString(
-                R.string.pref_camera_instant_capture_value_enable))) {
-            if (!mInstantCaptureSnapShot) {
-                // Disable instant capture after first snapshot is taken
-                instantCapture = mActivity.getString(
-                        R.string.pref_camera_instant_capture_value_disable);
-            }
-        }
-        Log.v(TAG, "Instant capture = " + instantCapture + ", mInstantCaptureSnapShot = "
-                + mInstantCaptureSnapShot);
-        mParameters.set(CameraSettings.KEY_QC_INSTANT_CAPTURE, instantCapture);
-
         // Set Advanced features.
         String advancedFeature = mPreferences.getString(
                 CameraSettings.KEY_ADVANCED_FEATURES,
@@ -3510,6 +3492,39 @@ public class PhotoModule
                 mParameters.setFocusMode(mFocusManager.getFocusMode());
             }
         }
+
+        // Set Instant Capture
+        String instantCapture = mPreferences.getString(
+                CameraSettings.KEY_INSTANT_CAPTURE,
+                mActivity.getString(R.string.pref_camera_instant_capture_default));
+
+        if (!instantCapture.equals(mActivity.getString(
+                R.string.pref_camera_instant_capture_value_disable))) {
+            if (zsl.equals("on")  &&
+                advancedFeature.equals(mActivity.getString(R.string.pref_camera_advanced_feature_value_none))) {
+                if (!mInstantCaptureSnapShot) {
+                    // Disable instant capture after first snapshot is taken
+                    instantCapture = mActivity.getString(
+                        R.string.pref_camera_instant_capture_value_disable);
+                }
+            } else {
+                mParameters.set(CameraSettings.KEY_QC_INSTANT_CAPTURE,
+                    mActivity.getString(R.string.pref_camera_instant_capture_value_disable));
+                instantCapture = mActivity.getString(
+                        R.string.pref_camera_instant_capture_value_disable);
+                mActivity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mUI.overrideSettings(CameraSettings.KEY_INSTANT_CAPTURE,
+                             mActivity.getString(R.string.pref_camera_instant_capture_value_disable));
+                    }
+                });
+            }
+        }
+        Log.v(TAG, "Instant capture = " + instantCapture + ", mInstantCaptureSnapShot = "
+                + mInstantCaptureSnapShot);
+        mParameters.set(CameraSettings.KEY_QC_INSTANT_CAPTURE, instantCapture);
+
 
         //Set Histogram
         String histogram = mPreferences.getString(
@@ -3805,14 +3820,18 @@ public class PhotoModule
         if (refocusOn.equals(mSceneMode)) {
             try {
                 mSceneMode = Parameters.SCENE_MODE_AUTO;
-                mUI.setPreference(CameraSettings.KEY_ADVANCED_FEATURES, refocusOn);
-                mUI.showRefocusDialog();
+                if (mHandler.getLooper() == Looper.myLooper()) {
+                    mUI.setPreference(CameraSettings.KEY_ADVANCED_FEATURES, refocusOn);
+                    mUI.showRefocusDialog();
+                }
             } catch (NullPointerException e) {
             }
         } else if (optizoomOn.equals(mSceneMode)) {
             try {
                 mSceneMode = Parameters.SCENE_MODE_AUTO;
-                mUI.setPreference(CameraSettings.KEY_ADVANCED_FEATURES, optizoomOn);
+                if (mHandler.getLooper() == Looper.myLooper()) {
+                    mUI.setPreference(CameraSettings.KEY_ADVANCED_FEATURES, optizoomOn);
+                }
             } catch (NullPointerException e) {
             }
         } else if (mSceneMode == null) {
@@ -4582,8 +4601,7 @@ public class PhotoModule
         // ignore the events after "onPause()"
         if (mPaused) return;
 
-        boolean recordLocation = RecordLocationPreference.get(
-                mPreferences, mContentResolver);
+        boolean recordLocation = RecordLocationPreference.get(mPreferences);
         mLocationManager.recordLocation(recordLocation);
         if(needRestart()){
             Log.v(TAG, "Restarting Preview... Camera Mode Changed");

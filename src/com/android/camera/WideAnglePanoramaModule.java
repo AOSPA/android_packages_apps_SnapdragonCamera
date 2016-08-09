@@ -301,7 +301,11 @@ public class WideAnglePanoramaModule
         mDialogPanoramaFailedString = appRes.getString(R.string.pano_dialog_panorama_failed);
         mDialogWaitingPreviousString = appRes.getString(R.string.pano_dialog_waiting_previous);
 
-        mPreferences = new ComboPreferences(mActivity);
+        mPreferences = ComboPreferences.get(mActivity);
+        if (mPreferences == null) {
+            mPreferences = new ComboPreferences(mActivity);
+        }
+
         mPreferences.setLocalId(mActivity, getPreferredCameraId(mPreferences));
         CameraSettings.upgradeGlobalPreferences(mPreferences.getGlobal(), activity);
         mLocationManager = new LocationManager(mActivity, null);
@@ -832,6 +836,7 @@ public class WideAnglePanoramaModule
             ExifInterface exif = new ExifInterface();
             try {
                 exif.readExif(jpegData);
+                exif.addMakeAndModelTag();
                 exif.addGpsDateTimeStampTag(mTimeTaken);
                 exif.addDateTimeStampTag(ExifInterface.TAG_DATE_TIME, mTimeTaken,
                         TimeZone.getDefault());
@@ -959,7 +964,11 @@ public class WideAnglePanoramaModule
     @Override
     public void onResumeBeforeSuper() {
         mPaused = false;
-        mPreferences = new ComboPreferences(mActivity);
+        mPreferences = ComboPreferences.get(mActivity);
+        if (mPreferences == null) {
+            mPreferences = new ComboPreferences(mActivity);
+        }
+
         CameraSettings.upgradeGlobalPreferences(mPreferences.getGlobal(), mActivity);
         mPreferences.setLocalId(mActivity, getPreferredCameraId(mPreferences));
         CameraSettings.upgradeLocalPreferences(mPreferences.getLocal());
@@ -1010,8 +1019,7 @@ public class WideAnglePanoramaModule
 
         mOrientationManager.resume();
         // Initialize location service.
-        boolean recordLocation = RecordLocationPreference.get(mPreferences,
-                mContentResolver);
+        boolean recordLocation = RecordLocationPreference.get(mPreferences);
         mLocationManager.recordLocation(recordLocation);
         mUI.initDisplayChangeListener();
         UsageStatistics.onContentViewChanged(
