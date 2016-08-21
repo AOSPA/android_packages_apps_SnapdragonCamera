@@ -113,6 +113,7 @@ public class PhotoModule
         ShutterButton.OnShutterButtonListener,
         MediaSaveService.Listener,
         OnCountDownFinishedListener,
+        LocationManager.Listener,
         SensorEventListener, MakeupLevelListener {
 
     private static final String TAG = "CAM_PhotoModule";
@@ -586,7 +587,7 @@ public class PhotoModule
         }
         initializeControlByIntent();
         mQuickCapture = mActivity.getIntent().getBooleanExtra(EXTRA_QUICK_CAPTURE, false);
-        mLocationManager = new LocationManager(mActivity, mUI);
+        mLocationManager = new LocationManager(mActivity, this);
         mSensorManager = (SensorManager)(mActivity.getSystemService(Context.SENSOR_SERVICE));
 
         brightnessProgressBar = (ProgressBar)mRootView.findViewById(R.id.progress);
@@ -644,13 +645,23 @@ public class PhotoModule
         }
 
         mLocationPromptTriggered = true;
-        mUI.showLocationDialog();
+
+        /* Enable the location at the begining, always.
+           If the user denies the permission, it will be disabled
+           right away due to exception */
+        enableRecordingLocation(true);
+    }
+
+    @Override
+    public void waitingLocationPermissionResult(boolean result) {
+        mLocationManager.waitingLocationPermissionResult(result);
     }
 
     @Override
     public void enableRecordingLocation(boolean enable) {
         setLocationPreference(enable ? RecordLocationPreference.VALUE_ON
                 : RecordLocationPreference.VALUE_OFF);
+        mLocationManager.recordLocation(enable);
     }
 
     @Override
@@ -696,7 +707,9 @@ public class PhotoModule
                 .apply();
         // TODO: Fix this to use the actual onSharedPreferencesChanged listener
         // instead of invoking manually
-        onSharedPreferenceChanged();
+        if (mUI.mMenuInitialized) {
+            onSharedPreferenceChanged();
+        }
     }
 
     private void onCameraOpened() {
@@ -1271,13 +1284,14 @@ public class PhotoModule
             Log.d(TAG, "JpegPictureCallback: onPictureTaken()");
             mUI.stopSelfieFlash();
             mUI.enableShutter(true);
+            if (mUI.isPreviewCoverVisible()) {
+                 // When take picture request is sent before starting preview, onPreviewFrame()
+                 // callback doesn't happen so removing preview cover here, instead.
+                 mUI.hidePreviewCover();
+            }
             if (mInstantCaptureSnapShot == true) {
                 Log.v(TAG, "Instant capture picture taken!");
                 mInstantCaptureSnapShot = false;
-
-                // When take picture request is sent before starting preview, onPreviewFrame()
-                // callback doesn't happen so removing preview cover here, instead.
-                mUI.hidePreviewCover();
             }
             if (mPaused) {
                 return;
@@ -2231,6 +2245,7 @@ public class PhotoModule
     public synchronized void onShutterButtonClick() {
         if ((mCameraDevice == null)
                 || mPaused || mUI.collapseCameraControls()
+                || !mUI.mMenuInitialized
                 || (mCameraState == SWITCHING_CAMERA)
                 || (mCameraState == PREVIEW_STOPPED)
                 || (mCameraState == LONGSHOT)
@@ -4884,6 +4899,12 @@ public class PhotoModule
         mCameraDevice.setParameters(mParameters);
         mParameters = mCameraDevice.getParameters();
     }
+
+    @Override
+    public void onErrorListener(int error) {
+        enableRecordingLocation(false);
+    }
+
 }
 
 /* Below is no longer needed, except to get rid of compile error

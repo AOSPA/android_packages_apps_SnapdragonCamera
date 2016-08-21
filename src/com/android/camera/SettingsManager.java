@@ -44,7 +44,10 @@ import android.util.Range;
 import android.util.Rational;
 import android.util.Size;
 
+import com.android.camera.imageprocessor.filter.BeautificationFilter;
 import com.android.camera.imageprocessor.filter.OptizoomFilter;
+import com.android.camera.imageprocessor.filter.TrackingFocusFrameListener;
+import com.android.camera.imageprocessor.filter.UbifocusFilter;
 import com.android.camera.ui.ListMenu;
 import com.android.camera.util.SettingTranslation;
 
@@ -71,6 +74,7 @@ public class SettingsManager implements ListMenu.SettingsListener {
     // Custom-Scenemodes start from 100
     public static final int SCENE_MODE_DUAL_INT = 100;
     public static final int SCENE_MODE_OPTIZOOM_INT = 101;
+    public static final int SCENE_MODE_UBIFOCUS_INT = 102;
     public static final String SCENE_MODE_DUAL_STRING = "100";
     public static final String KEY_CAMERA_SAVEPATH = "pref_camera2_savepath_key";
     public static final String KEY_RECORD_LOCATION = "pref_camera2_recordlocation_key";
@@ -79,10 +83,12 @@ public class SettingsManager implements ListMenu.SettingsListener {
     public static final String KEY_FLASH_MODE = "pref_camera2_flashmode_key";
     public static final String KEY_WHITE_BALANCE = "pref_camera2_whitebalance_key";
     public static final String KEY_MAKEUP = "pref_camera2_makeup_key";
+    public static final String KEY_TRACKINGFOCUS = "pref_camera2_trackingfocus_key";
     public static final String KEY_CAMERA2 = "pref_camera2_camera2_key";
     public static final String KEY_MONO_ONLY = "pref_camera2_mono_only_key";
     public static final String KEY_MONO_PREVIEW = "pref_camera2_mono_preview_key";
     public static final String KEY_CLEARSIGHT = "pref_camera2_clearsight_key";
+    public static final String KEY_MPO = "pref_camera2_mpo_key";
     public static final String KEY_FILTER_MODE = "pref_camera2_filter_mode_key";
     public static final String KEY_COLOR_EFFECT = "pref_camera2_coloreffect_key";
     public static final String KEY_SCENE_MODE = "pref_camera2_scenemode_key";
@@ -136,7 +142,7 @@ public class SettingsManager implements ListMenu.SettingsListener {
                 String cameraId = cameraIdList[i];
                 CameraCharacteristics characteristics
                         = manager.getCameraCharacteristics(cameraId);
-                Byte monoOnly = 0;
+                byte monoOnly = 0;
                 try {
                     monoOnly = characteristics.get(CaptureModule.MetaDataMonoOnlyKey);
                 }catch(Exception e) {
@@ -219,6 +225,17 @@ public class SettingsManager implements ListMenu.SettingsListener {
         filterPreferences(cameraId);
         initDepedencyTable();
         initializeValueMap();
+        checkInitialDependency(cameraId);
+    }
+
+    private void checkInitialDependency(int cameraId) {
+        ListPreference videoQuality = mPreferenceGroup.findPreference(KEY_VIDEO_QUALITY);
+        if (videoQuality != null) {
+            String scene = getValue(SettingsManager.KEY_MAKEUP);
+            if(scene != null && scene.equalsIgnoreCase("on")) {
+                updateVideoQualityMenu(cameraId, 640, 480);
+            }
+        }
     }
 
     private void initDepedencyTable() {
@@ -447,6 +464,20 @@ public class SettingsManager implements ListMenu.SettingsListener {
         else return CaptureModule.MONO_ID;
     }
 
+    public void updateVideoQualityMenu(int cameraId, int maxWidth, int maxHeight) {
+        ListPreference videoQuality = mPreferenceGroup.findPreference(KEY_VIDEO_QUALITY);
+        if (videoQuality != null) {
+            List<String> sizes;
+            if(maxWidth < 0 && maxHeight < 0) {
+                sizes = getSupportedVideoSize(cameraId);
+            } else {
+                sizes = getSupportedVideoSize(cameraId, maxWidth, maxHeight);
+            }
+            CameraSettings.filterUnsupportedOptions(mPreferenceGroup,
+                    videoQuality, sizes);
+        }
+    }
+
     private void filterPreferences(int cameraId) {
         // filter unsupported preferences
         ListPreference whiteBalance = mPreferenceGroup.findPreference(KEY_WHITE_BALANCE);
@@ -460,6 +491,7 @@ public class SettingsManager implements ListMenu.SettingsListener {
         ListPreference clearsight = mPreferenceGroup.findPreference(KEY_CLEARSIGHT);
         ListPreference monoPreview = mPreferenceGroup.findPreference(KEY_MONO_PREVIEW);
         ListPreference monoOnly = mPreferenceGroup.findPreference(KEY_MONO_ONLY);
+        ListPreference mpo = mPreferenceGroup.findPreference(KEY_MPO);
         ListPreference redeyeReduction = mPreferenceGroup.findPreference(KEY_REDEYE_REDUCTION);
         ListPreference videoQuality = mPreferenceGroup.findPreference(KEY_VIDEO_QUALITY);
         ListPreference videoEncoder = mPreferenceGroup.findPreference(KEY_VIDEO_ENCODER);
@@ -467,6 +499,8 @@ public class SettingsManager implements ListMenu.SettingsListener {
         ListPreference noiseReduction = mPreferenceGroup.findPreference(KEY_NOISE_REDUCTION);
         ListPreference videoFlash = mPreferenceGroup.findPreference(KEY_VIDEO_FLASH_MODE);
         ListPreference faceDetection = mPreferenceGroup.findPreference(KEY_FACE_DETECTION);
+        ListPreference makeup = mPreferenceGroup.findPreference(KEY_MAKEUP);
+        ListPreference trackingfocus = mPreferenceGroup.findPreference(KEY_TRACKINGFOCUS);
 
         if (whiteBalance != null) {
             CameraSettings.filterUnsupportedOptions(mPreferenceGroup,
@@ -502,7 +536,7 @@ public class SettingsManager implements ListMenu.SettingsListener {
                     iso, getSupportedIso(cameraId));
         }
 
-        if (iso != null) {
+        if (videoQuality != null) {
             CameraSettings.filterUnsupportedOptions(mPreferenceGroup,
                     videoQuality, getSupportedVideoSize(cameraId));
         }
@@ -511,6 +545,7 @@ public class SettingsManager implements ListMenu.SettingsListener {
             if (clearsight != null) removePreference(mPreferenceGroup, KEY_CLEARSIGHT);
             if (monoPreview != null) removePreference(mPreferenceGroup, KEY_MONO_PREVIEW);
             if (monoOnly != null) removePreference(mPreferenceGroup, KEY_MONO_ONLY);
+            if (mpo != null) removePreference(mPreferenceGroup, KEY_MPO);
         }
 
         if (redeyeReduction != null) {
@@ -541,6 +576,16 @@ public class SettingsManager implements ListMenu.SettingsListener {
         if (faceDetection != null) {
             if (!isFaceDetectionSupported(cameraId))
                 removePreference(mPreferenceGroup, KEY_FACE_DETECTION);
+        }
+
+        if (makeup != null) {
+            if (!BeautificationFilter.isSupportedStatic())
+                removePreference(mPreferenceGroup, KEY_MAKEUP);
+        }
+
+        if (trackingfocus != null) {
+            if (!TrackingFocusFrameListener.isSupportedStatic())
+                removePreference(mPreferenceGroup, KEY_TRACKINGFOCUS);
         }
     }
 
@@ -754,6 +799,19 @@ public class SettingsManager implements ListMenu.SettingsListener {
         return res;
     }
 
+    private List<String> getSupportedVideoSize(int cameraId, int maxWidth, int maxHeight) {
+        StreamConfigurationMap map = mCharacteristics.get(cameraId).get(
+                CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+        Size[] sizes = map.getOutputSizes(MediaRecorder.class);
+        List<String> res = new ArrayList<>();
+        for (int i = 0; i < sizes.length; i++) {
+            if(sizes[i].getWidth() <= maxWidth && sizes[i].getHeight() <= maxHeight) {
+                res.add(sizes[i].toString());
+            }
+        }
+        return res;
+    }
+
     private List<String> getSupportedRedeyeReduction(int cameraId) {
         int[] flashModes = mCharacteristics.get(cameraId).get(CameraCharacteristics
                 .CONTROL_AE_AVAILABLE_MODES);
@@ -784,7 +842,8 @@ public class SettingsManager implements ListMenu.SettingsListener {
         List<String> modes = new ArrayList<>();
         modes.add("0"); // need special case handle for auto scene mode
         if (mIsMonoCameraPresent) modes.add(SCENE_MODE_DUAL_STRING); // need special case handle for dual mode
-        if (OptizoomFilter.isSupportedStatic()) modes.add(SCENE_MODE_OPTIZOOM_INT + ""); // need special case handle for dual mode
+        if (OptizoomFilter.isSupportedStatic()) modes.add(SCENE_MODE_OPTIZOOM_INT + "");
+        if (UbifocusFilter.isSupportedStatic() && cameraId == CaptureModule.BAYER_ID) modes.add(SCENE_MODE_UBIFOCUS_INT + "");
         for (int mode : sceneModes) {
             modes.add("" + mode);
         }
