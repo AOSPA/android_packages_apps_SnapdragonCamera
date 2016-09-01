@@ -1310,7 +1310,7 @@ public class PhotoModule
             if(mSnapshotMode == CameraInfo.CAMERA_SUPPORT_MODE_ZSL) {
                 Log.v(TAG, "JpegPictureCallback : in zslmode");
                 mParameters = mCameraDevice.getParameters();
-                mBurstSnapNum = mParameters.getInt("num-snaps-per-shutter");
+                mBurstSnapNum = CameraUtil.getNumSnapsPerShutter(mParameters);
             }
             Log.v(TAG, "JpegPictureCallback: Received = " + mReceivedSnapNum +
                       "Burst count = " + mBurstSnapNum);
@@ -1669,7 +1669,7 @@ public class PhotoModule
             mParameters = mCameraDevice.getParameters();
         }
 
-        mBurstSnapNum = mParameters.getInt("num-snaps-per-shutter");
+        mBurstSnapNum = CameraUtil.getNumSnapsPerShutter(mParameters);
         mReceivedSnapNum = 0;
         mPreviewRestartSupport = SystemProperties.getBoolean(
                 PERSIST_PREVIEW_RESTART, false);
@@ -1762,9 +1762,9 @@ public class PhotoModule
             overrideCameraSettings(flashMode, null, null,
                                    exposureCompensation, touchAfAec,
                                    mParameters.getAutoExposure(),
-                                   Integer.toString(mParameters.getSaturation()),
-                                   Integer.toString(mParameters.getContrast()),
-                                   Integer.toString(mParameters.getSharpness()),
+                                   getSaturationSafe(),
+                                   getContrastSafe(),
+                                   getSharpnessSafe(),
                                    colorEffect,
                                    mSceneMode, redeyeReduction, aeBracketing);
             mUI.overrideSettings(CameraSettings.KEY_LONGSHOT,
@@ -1923,9 +1923,9 @@ public class PhotoModule
             overrideCameraSettings(null, whiteBalance, focusMode,
                     exposureCompensation, touchAfAec,
                     mParameters.getAutoExposure(),
-                    Integer.toString(mParameters.getSaturation()),
-                    Integer.toString(mParameters.getContrast()),
-                    Integer.toString(mParameters.getSharpness()),
+                    getSaturationSafe(),
+                    getContrastSafe(),
+                    getSharpnessSafe(),
                     colorEffect,
                     sceneMode, redeyeReduction, aeBracketing);
         } else if (mFocusManager.isZslEnabled()) {
@@ -1946,7 +1946,7 @@ public class PhotoModule
         }
         /* Disable focus if aebracket is ON */
         String aeBracket = mParameters.get(CameraSettings.KEY_QC_AE_BRACKETING);
-        if (!aeBracket.equalsIgnoreCase("off")) {
+        if (aeBracket != null && !aeBracket.equalsIgnoreCase("off")) {
             flashMode = Parameters.FLASH_MODE_OFF;
             mParameters.setFlashMode(flashMode);
         }
@@ -2979,6 +2979,39 @@ public class PhotoModule
         return true;
     }
 
+    private String getSaturationSafe() {
+        String ret = null;
+        if (CameraUtil.isSupported(mParameters, "saturation") &&
+                CameraUtil.isSupported(mParameters, "max-saturation")) {
+            ret = mPreferences.getString(
+                    CameraSettings.KEY_SATURATION,
+                    mActivity.getString(R.string.pref_camera_saturation_default));
+        }
+        return ret;
+    }
+
+    private String getContrastSafe() {
+        String ret = null;
+        if (CameraUtil.isSupported(mParameters, "contrast") &&
+                CameraUtil.isSupported(mParameters, "max-contrast")) {
+            ret = mPreferences.getString(
+                    CameraSettings.KEY_CONTRAST,
+                    mActivity.getString(R.string.pref_camera_contrast_default));
+        }
+        return ret;
+    }
+
+    private String getSharpnessSafe() {
+        String ret = null;
+        if (CameraUtil.isSupported(mParameters, "sharpness") &&
+                CameraUtil.isSupported(mParameters, "max-sharpness")) {
+            ret = mPreferences.getString(
+                    CameraSettings.KEY_SHARPNESS,
+                    mActivity.getString(R.string.pref_camera_sharpness_default));
+        }
+        return ret;
+    }
+
     private void qcomUpdateAdvancedFeatures(String ubiFocus,
                                             String chromaFlash,
                                             String reFocus,
@@ -3146,32 +3179,32 @@ public class PhotoModule
         }
 
         //Set Saturation
-        String saturationStr = mPreferences.getString(
-                CameraSettings.KEY_SATURATION,
-                mActivity.getString(R.string.pref_camera_saturation_default));
-        int saturation = Integer.parseInt(saturationStr);
-        Log.v(TAG, "Saturation value =" + saturation);
-        if((0 <= saturation) && (saturation <= mParameters.getMaxSaturation())){
-            mParameters.setSaturation(saturation);
+        String saturationStr = getSaturationSafe();
+        if (saturationStr != null) {
+            int saturation = Integer.parseInt( saturationStr);
+            Log.v(TAG, "Saturation value =" + saturation);
+            if((0 <= saturation) && (saturation <= mParameters.getMaxSaturation())){
+                mParameters.setSaturation(saturation);
+            }
         }
         // Set contrast parameter.
-        String contrastStr = mPreferences.getString(
-                CameraSettings.KEY_CONTRAST,
-                mActivity.getString(R.string.pref_camera_contrast_default));
-        int contrast = Integer.parseInt(contrastStr);
-        Log.v(TAG, "Contrast value =" +contrast);
-        if((0 <= contrast) && (contrast <= mParameters.getMaxContrast())){
-            mParameters.setContrast(contrast);
+        String contrastStr = getContrastSafe();
+        if (contrastStr != null) {
+            int contrast = Integer.parseInt(contrastStr);
+            Log.v(TAG, "Contrast value =" + contrast);
+            if ((0 <= contrast) && (contrast <= mParameters.getMaxContrast())) {
+                mParameters.setContrast(contrast);
+            }
         }
         // Set sharpness parameter
-        String sharpnessStr = mPreferences.getString(
-                CameraSettings.KEY_SHARPNESS,
-                mActivity.getString(R.string.pref_camera_sharpness_default));
-        int sharpness = Integer.parseInt(sharpnessStr) *
-                (mParameters.getMaxSharpness()/MAX_SHARPNESS_LEVEL);
-        Log.v(TAG, "Sharpness value =" + sharpness);
-        if((0 <= sharpness) && (sharpness <= mParameters.getMaxSharpness())){
-            mParameters.setSharpness(sharpness);
+        String sharpnessStr = getSharpnessSafe();
+        if (sharpnessStr != null) {
+            int sharpness = Integer.parseInt(sharpnessStr) *
+                    (mParameters.getMaxSharpness() / MAX_SHARPNESS_LEVEL);
+            Log.v(TAG, "Sharpness value =" + sharpness);
+            if ((0 <= sharpness) && (sharpness <= mParameters.getMaxSharpness())) {
+                mParameters.setSharpness(sharpness);
+            }
         }
         // Set Face Recognition
         String faceRC = mPreferences.getString(
@@ -3575,7 +3608,7 @@ public class PhotoModule
 
         /* Disable focus if aebracket is ON */
         String aeBracket = mParameters.get(CameraSettings.KEY_QC_AE_BRACKETING);
-        if (!aeBracket.equalsIgnoreCase("off")) {
+        if (aeBracket != null && !aeBracket.equalsIgnoreCase("off")) {
             String fMode = Parameters.FLASH_MODE_OFF;
             mParameters.setFlashMode(fMode);
         }
