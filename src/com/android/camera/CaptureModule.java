@@ -2301,15 +2301,16 @@ public class CaptureModule implements CameraModule, PhotoController,
     }
 
     private void updateVideoSnapshotSize() {
-        String auto = mSettingsManager.getValue(SettingsManager.KEY_AUTO_VIDEOSNAP_SIZE);
-        if (auto != null && auto.equals("enable")) {
-            Size[] sizes = mSettingsManager.getSupportedOutputSize(getMainCameraId(), ImageFormat.JPEG);
-            mVideoSnapshotSize = getMaxSizeWithRatio(sizes, mVideoSize);
-        } else {
-            mVideoSnapshotSize = mPictureSize;
+        mVideoSnapshotSize = mPictureSize;
+        if (is4kSize(mVideoSize) && is4kSize(mVideoSnapshotSize)) {
+            mVideoSnapshotSize = getMaxPictureSizeLessThan4k();
         }
         Size[] thumbSizes = mSettingsManager.getSupportedThumbnailSizes(getMainCameraId());
         mVideoSnapshotThumbSize = getOptimalPreviewSize(mVideoSnapshotSize, thumbSizes, 0, 0); // get largest thumb size
+    }
+
+    private boolean is4kSize(Size size) {
+        return (size.getHeight() >= 2160 || size.getWidth() >= 3840);
     }
 
     private void updateMaxVideoDuration() {
@@ -3436,6 +3437,13 @@ public class CaptureModule implements CameraModule, PhotoController,
         return optimal;
     }
 
+    private Size getMaxPictureSizeLessThan4k() {
+        Size[] sizes = mSettingsManager.getSupportedOutputSize(getMainCameraId(), ImageFormat.JPEG);
+        for (Size size : sizes) {
+            if (!is4kSize(size)) return size;
+        }
+        return sizes[sizes.length - 1];
+    }
     private Size getMaxSizeWithRatio(Size[] sizes, Size reference) {
         float ratio = (float) reference.getWidth() / reference.getHeight();
         for (Size size : sizes) {
