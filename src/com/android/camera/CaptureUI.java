@@ -261,7 +261,7 @@ public class CaptureUI implements FocusOverlayManager.FocusUI,
         mActivity = activity;
         mModule = module;
         mRootView = parent;
-        mSettingsManager = SettingsManager.getInstance();
+        mSettingsManager = activity.getSettingsManager();
         mSettingsManager.registerListener(this);
         mActivity.getLayoutInflater().inflate(R.layout.capture_module,
                 (ViewGroup) mRootView, true);
@@ -384,7 +384,6 @@ public class CaptureUI implements FocusOverlayManager.FocusUI,
         mGestures.setRenderOverlay(mRenderOverlay);
         mRenderOverlay.requestLayout();
 
-        mActivity.setPreviewGestures(mGestures);
         ((ViewGroup)mRootView).removeView(mRecordingTimeRect);
         mCameraControls.setPreviewRatio(0, true);
     }
@@ -393,6 +392,7 @@ public class CaptureUI implements FocusOverlayManager.FocusUI,
         mGestures.setCaptureUI(this);
         mGestures.setZoomEnabled(mSettingsManager.isZoomSupported(cameraIds));
         initializeZoom(cameraIds);
+        mActivity.setPreviewGestures(mGestures);
     }
 
     public ViewGroup getSceneAndFilterLayout() {
@@ -1430,6 +1430,7 @@ public class CaptureUI implements FocusOverlayManager.FocusUI,
             mMonoDummyOutputAllocation.destroy();
             mMonoDummyOutputAllocation = null;
         }
+        mSurfaceViewMono.setVisibility(View.GONE);
     }
 
     public boolean collapseCameraControls() {
@@ -1491,6 +1492,8 @@ public class CaptureUI implements FocusOverlayManager.FocusUI,
 
     @Override
     public void onFocusFailed(boolean timeOut) {
+        FocusIndicator indicator = getFocusIndicator();
+        if (indicator != null) indicator.showFail(timeOut);
 
     }
 

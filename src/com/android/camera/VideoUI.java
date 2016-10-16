@@ -295,15 +295,17 @@ public class VideoUI implements PieRenderer.PieListener,
         Point size = new Point();
         mActivity.getWindowManager().getDefaultDisplay().getSize(size);
         mScreenRatio = CameraUtil.determineRatio(size.x, size.y);
-        if (mScreenRatio == CameraUtil.RATIO_16_9) {
-            int l = size.x > size.y ? size.x : size.y;
-            int tm = mActivity.getResources().getDimensionPixelSize(R.dimen.preview_top_margin);
-            int bm = mActivity.getResources().getDimensionPixelSize(R.dimen.preview_bottom_margin);
-            mTopMargin = l / 4 * tm / (tm + bm);
-            mBottomMargin = l / 4 - mTopMargin;
-        }
+        calculateMargins(size);
         mCameraControls.setMargins(mTopMargin, mBottomMargin);
         ((ViewGroup)mRootView).removeView(mRecordingTimeRect);
+    }
+
+    private void calculateMargins(Point size) {
+        int l = size.x > size.y ? size.x : size.y;
+        int tm = mActivity.getResources().getDimensionPixelSize(R.dimen.preview_top_margin);
+        int bm = mActivity.getResources().getDimensionPixelSize(R.dimen.preview_bottom_margin);
+        mTopMargin = l / 4 * tm / (tm + bm);
+        mBottomMargin = l / 4 - mTopMargin;
     }
 
     public void cameraOrientationPreviewResize(boolean orientation){
@@ -400,6 +402,7 @@ public class VideoUI implements PieRenderer.PieListener,
 
         float scaledTextureWidth, scaledTextureHeight;
         int rotation = CameraUtil.getDisplayRotation(mActivity);
+        mScreenRatio = CameraUtil.determineRatio(ratio);
         if (mScreenRatio == CameraUtil.RATIO_16_9
                 && CameraUtil.determinCloseRatio(ratio) == CameraUtil.RATIO_4_3) {
             int l = (mTopMargin + mBottomMargin) * 4;
@@ -432,6 +435,9 @@ public class VideoUI implements PieRenderer.PieListener,
             }
         } else {
             float width = mMaxPreviewWidth, height = mMaxPreviewHeight;
+            if (width == 0 || height == 0) return;
+            if(mScreenRatio == CameraUtil.RATIO_4_3)
+                height -=  (mTopMargin + mBottomMargin);
             if (mOrientationResize) {
                 scaledTextureWidth = height * mAspectRatio;
                 if (scaledTextureWidth > width) {
@@ -796,8 +802,11 @@ public class VideoUI implements PieRenderer.PieListener,
     }
 
     public boolean sendTouchToMenu(MotionEvent ev) {
-        View v = mMenuLayout.getChildAt(0);
-        return v.dispatchTouchEvent(ev);
+        if (mMenuLayout != null) {
+            View v = mMenuLayout.getChildAt(0);
+            return v.dispatchTouchEvent(ev);
+        }
+        return false;
     }
 
     public void dismissSceneModeMenu() {
@@ -1250,9 +1259,6 @@ public class VideoUI implements PieRenderer.PieListener,
         mFaceView.setVisibility(View.VISIBLE);
         mFaceView.setDisplayOrientation(orientation);
         mFaceView.setMirror(mirror);
-        LayoutParams layoutParams = new LayoutParams(
-           LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-        mFaceView.setLayoutParams(layoutParams);
         mFaceView.resume();
     }
 

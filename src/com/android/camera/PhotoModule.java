@@ -702,7 +702,6 @@ public class PhotoModule
         } catch (InterruptedException ex) {
             // ignore
         }
-        mCameraDevice.setPreviewDisplay(null);
         stopPreview();
     }
 
@@ -1477,7 +1476,7 @@ public class PhotoModule
                                 mUI.setDownFactor(4);
                             }
                             if (mAnimateCapture) {
-                                mUI.animateCapture(jpegData, orientation, mMirror);
+                                mUI.animateCapture(jpegData);
                             }
                         } else {
                             // In long shot mode, we do not want to update the preview thumbnail
@@ -1491,14 +1490,22 @@ public class PhotoModule
                         stopPreview();
                         mJpegImageData = jpegData;
                         if (!mQuickCapture) {
-                            mUI.showCapturedImageForReview(jpegData, orientation, mMirror);
+                            mUI.showCapturedImageForReview(jpegData, orientation, false);
                         } else {
                             onCaptureDone();
                         }
                     }
-                    if(!mLongshotActive)
-                        mActivity.updateStorageSpaceAndHint();
-                    mUI.updateRemainingPhotos(--mRemainingPhotos);
+                    if(!mLongshotActive) {
+                        mActivity.updateStorageSpaceAndHint(
+                                new CameraActivity.OnStorageUpdateDoneListener() {
+                            @Override
+                            public void onStorageUpdateDone(long storageSpace) {
+                                mUI.updateRemainingPhotos(--mRemainingPhotos);
+                            }
+                        });
+                    } else {
+                        mUI.updateRemainingPhotos(--mRemainingPhotos);
+                    }
                     long now = System.currentTimeMillis();
                     mJpegCallbackFinishTime = now - mJpegPictureCallbackTime;
                     Log.v(TAG, "mJpegCallbackFinishTime = "
@@ -1720,6 +1727,12 @@ public class PhotoModule
             mUI.enableShutter(false);
         }
 
+        if (!isShutterSoundOn()) {
+            mCameraDevice.enableShutterSound(false);
+        } else {
+            mCameraDevice.enableShutterSound(!mRefocus);
+        }
+
         if (mCameraState == LONGSHOT) {
             mLongShotCaptureCountLimit = SystemProperties.getInt(
                                     "persist.camera.longshot.shotnum", 0);
@@ -1736,12 +1749,6 @@ public class PhotoModule
                         new JpegPictureCallback(loc));
             }
         } else {
-            if (!isShutterSoundOn()) {
-                mCameraDevice.enableShutterSound(false);
-            } else {
-                mCameraDevice.enableShutterSound(!mRefocus);
-            }
-
             mCameraDevice.takePicture(mHandler,
                     new ShutterCallback(!animateBefore),
                     mRawPictureCallback, mPostViewPictureCallback,
@@ -2257,7 +2264,7 @@ public class PhotoModule
            if (mCameraState == LONGSHOT) {
                mLongshotActive = false;
                mCameraDevice.setLongshot(false);
-               mUI.animateCapture(mLastJpegData, mLastJpegOrientation, mMirror);
+               mUI.animateCapture(mLastJpegData);
                mLastJpegData = null;
                if (!mFocusManager.isZslEnabled()) {
                    setupPreview();
@@ -2672,6 +2679,12 @@ public class PhotoModule
         // we will update focus manager with proper UI.
         if (mFocusManager != null && mUI != null) {
             mFocusManager.setPhotoUI(mUI);
+
+            View root = mUI.getRootView();
+            // These depend on camera parameters.
+            int width = root.getWidth();
+            int height = root.getHeight();
+            mFocusManager.setPreviewSize(width, height);
         }
     }
 
@@ -4879,6 +4892,10 @@ public class PhotoModule
 
     @Override
     public void onMakeupLevel(String key, String value) {
+        if (mCameraDevice == null) {
+            Log.d(TAG,"MakeupLevel failed CameraDevice not yet initialized");
+            return;
+        }
         synchronized (mCameraDevice) {
             onMakeupLevelSync(key, value);
         }

@@ -538,7 +538,7 @@ public class PhotoUI implements PieListener,
         mActivity.setPreviewGestures(mGestures);
     }
 
-    public void animateCapture(final byte[] jpegData, int orientation, boolean mirror) {
+    public void animateCapture(final byte[] jpegData) {
         // Decode jpeg byte array and then animate the jpeg
         mActivity.updateThumbnail(jpegData);
     }
@@ -1299,9 +1299,6 @@ public class PhotoUI implements PieListener,
         mFaceView.setVisibility(View.VISIBLE);
         mFaceView.setDisplayOrientation(orientation);
         mFaceView.setMirror(mirror);
-        LayoutParams layoutParams = new LayoutParams(
-                LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-        mFaceView.setLayoutParams(layoutParams);
         mFaceView.resume();
     }
 
