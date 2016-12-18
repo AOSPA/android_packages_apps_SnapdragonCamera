@@ -2878,6 +2878,10 @@ public class CaptureModule implements CameraModule, PhotoController,
         mSettingsManager.setValue(key, value);
     }
 
+    public boolean delayAppExitToSaveImage() {
+        return false;
+    }
+
     @Override
     public void onPreviewUIReady() {
         updatePreviewSurfaceReadyState(true);
