@@ -739,7 +739,6 @@ CHAR LIMIT = NONE] -->
     <!--  String shown when setting the homepage wallpaper in the background [CHAR LIMIT=NONE] -->
     <string name="setting_wallpaper">Setting wallpaper</string>
 
-
     <!-- Menu, Video rotation labels [CHAR LIMIT=50] -->
     <string name="pref_camera_video_rotation_label_0">0</string>
     <string name="pref_camera_video_rotation_label_90">90</string>
@@ -765,4 +764,12 @@ CHAR LIMIT = NONE] -->
          NOTE: for Chinese (zh) and Korean (ko) the pixel number (parameter two)
          will be multiplied by 100 as those languages want to count by ten thousands -->
     <string name="pref_camera_megapixel_format">(%1$s) %2$1.1f megapixels</string>
+
+    <!-- Title for anti-shake dialog warning the user about reduced photo quality [CHAR LIMIT = 50] -->
+    <string name="antishake_quality_title">Reduced photo quality</string>
+    <!-- Message for anti-shake dialog warning the user about reduced photo quality [CHAR LIMIT = None] -->
+    <string name="antishake_quality_prompt">Anti-shake mode increases shutter speeds, which adds more noise to photos and reduces photo quality.</string>
+    <!-- Neutral answer for anti-shake dialog warning the user about reduced photo quality [CHAR LIMIT = 20] -->
+    <string name="antishake_quality_ok">OK</string>
+
 </resources>

@@ -266,6 +266,8 @@ public class PhotoModule
     private byte[] mLastJpegData;
     private int mLastJpegOrientation = 0;
 
+    private boolean mAntishakeEnabledOnce;
+
     private static Context mApplicationContext = null;
 
     private Runnable mDoSnapRunnable = new Runnable() {
@@ -2162,6 +2164,12 @@ public class PhotoModule
         switchIconPref.setLabels(labels);
         switchIconPref.setLargeIconIds(largeIconIds);
 
+        if (!mAntishakeEnabledOnce) {
+            IconListPreference antishakePref =
+                        (IconListPreference)mPreferenceGroup.findPreference(
+                        CameraSettings.KEY_ANTISHAKE);
+            antishakePref.setValue("off");
+        }
     }
 
     @Override
@@ -3259,8 +3267,14 @@ public class PhotoModule
             String iso = mPreferences.getString(CameraSettings.KEY_ISO, isoDefault);
             String antishakeDefault = mActivity.getString(R.string.pref_camera_antishake_default);
             String antishake = mPreferences.getString(CameraSettings.KEY_ANTISHAKE, antishakeDefault);
-            if (iso.equals(isoDefault) && antishake.equals("on")) {
-                iso = "ISO_HJR";
+            if (antishake.equals("on") && mCameraState != INIT) {
+                if (!mAntishakeEnabledOnce) {
+                    mAntishakeEnabledOnce = true;
+                    mUI.showAntishakeDialog();
+                }
+                if (iso.equals(isoDefault)) {
+                    iso = "ISO_HJR";
+                }
             }
             if (CameraUtil.isSupported(iso,
                 CameraSettings.getSupportedIsoValues(mParameters))) {

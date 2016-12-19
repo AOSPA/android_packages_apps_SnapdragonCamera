@@ -117,6 +117,7 @@ public class PhotoUI implements PieListener,
     private CameraControls mCameraControls;
     private MenuHelp mMenuHelp;
     private AlertDialog mLocationDialog;
+    private AlertDialog mAntishakeDialog;
 
     private GridView mGridView;
 
@@ -698,6 +699,68 @@ public class PhotoUI implements PieListener,
         muteButton.setVisibility(View.GONE);
     }
 
+    public void showAntishakeDialog() {
+        mAntishakeDialog = new AlertDialog.Builder(mActivity)
+                .setTitle(R.string.antishake_quality_title)
+                .setMessage(R.string.antishake_quality_prompt)
+                .setNeutralButton(R.string.antishake_quality_ok,
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int arg1) {
+                                dialog.cancel();
+                            }
+                        })
+                .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                    @Override
+                    public void onCancel(DialogInterface dialog) {
+                        mAntishakeDialog = null;
+                    }
+                })
+                .setOnDismissListener(new DialogInterface.OnDismissListener() {
+                    @Override
+                    public void onDismiss(DialogInterface dialog) {
+                        mActivity.setSystemBarsVisibility(false);
+                    }
+                })
+                .show();
+    }
+
+    public void showLocationDialog() {
+        mLocationDialog = new AlertDialog.Builder(mActivity)
+                .setTitle(R.string.remember_location_title)
+                .setMessage(R.string.remember_location_prompt)
+                .setPositiveButton(R.string.remember_location_yes,
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int arg1) {
+                                mController.enableRecordingLocation(true);
+                                mLocationDialog = null;
+                            }
+                        })
+                .setNegativeButton(R.string.remember_location_no,
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int arg1) {
+                                dialog.cancel();
+                            }
+                        })
+                .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                    @Override
+                    public void onCancel(DialogInterface dialog) {
+                        mController.enableRecordingLocation(false);
+                        mLocationDialog = null;
+                    }
+                })
+                .setOnDismissListener(new DialogInterface.OnDismissListener() {
+                    @Override
+                    public void onDismiss(DialogInterface dialog) {
+                        mActivity.setSystemBarsVisibility(false);
+                    }
+                })
+                .show();
+>>>>>>> 8550a30... Snap: Make anti-shake option volatile and add a warning message
+    }
+
     public void initializeZoom(Camera.Parameters params) {
         if ((params == null) || !params.isZoomSupported()
                 || (mZoomRenderer == null)) return;
@@ -1238,6 +1301,11 @@ public class PhotoUI implements PieListener,
             mLocationDialog.dismiss();
         }
         mLocationDialog = null;
+
+        if (mAntishakeDialog != null && mAntishakeDialog.isShowing()) {
+            mAntishakeDialog.dismiss();
+        }
+        mAntishakeDialog = null;
     }
 
     public void initDisplayChangeListener() {
