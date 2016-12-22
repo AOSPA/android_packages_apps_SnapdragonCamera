@@ -629,6 +629,11 @@ public class CaptureModule implements CameraModule, PhotoController,
         }
     }
 
+    public void unRegisterSettingsListener(){
+        mSettingsManager.unregisterListener(this);
+        mSettingsManager.unregisterListener(mUI);
+    }
+
     public void startFaceDetection() {
             mUI.onStartFaceDetection(mDisplayOrientation,
                     mSettingsManager.isFacingFront(getMainCameraId()),
