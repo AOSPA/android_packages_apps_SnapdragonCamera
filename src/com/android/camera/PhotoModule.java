@@ -1410,7 +1410,9 @@ public class PhotoModule
                 if (!mIsImageCaptureIntent) {
                     setCameraState(IDLE);
                 }
-                startFaceDetection();
+                mHandler.post(() -> {
+                    startFaceDetection();
+                });
             }
 
             mLastPhotoTakenWithRefocus = mRefocus;
