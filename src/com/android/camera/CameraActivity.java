@@ -159,6 +159,8 @@ public class CameraActivity extends Activity
     private static final int HIDE_ACTION_BAR = 1;
     private static final long SHOW_ACTION_BAR_TIMEOUT_MS = 3000;
 
+    private static final int SWITCH_SAVE_PATH = 2;
+
     /** Permission request code */
     private static final int PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION = 1;
 
@@ -361,6 +363,8 @@ public class CameraActivity extends Activity
             if (msg.what == HIDE_ACTION_BAR) {
                 removeMessages(HIDE_ACTION_BAR);
                 CameraActivity.this.setSystemBarsVisibility(false);
+            }else if ( msg.what == SWITCH_SAVE_PATH ) {
+                mCurrentModule.onSwitchSavePath();
             }
         }
     }
@@ -1857,7 +1861,7 @@ public class CameraActivity extends Activity
             mStorageSpaceBytes = Storage.getAvailableSpace();
             if (Storage.switchSavePath()) {
                 mStorageSpaceBytes = Storage.getAvailableSpace();
-                mCurrentModule.onSwitchSavePath();
+                mMainHandler.sendEmptyMessage(SWITCH_SAVE_PATH);
             }
             return mStorageSpaceBytes;
         }
