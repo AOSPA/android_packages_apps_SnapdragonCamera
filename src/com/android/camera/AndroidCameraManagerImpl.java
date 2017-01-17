@@ -210,17 +210,20 @@ class AndroidCameraManagerImpl implements CameraManager {
                 switch (msg.what) {
                     case OPEN_CAMERA:
                         try {
-                            Method openMethod = Class.forName("android.hardware.Camera").getMethod(
-                                    "openLegacy", int.class, int.class);
-                            mCamera = (android.hardware.Camera) openMethod.invoke(
-                                    null, msg.arg1, CAMERA_HAL_API_VERSION_1_0);
-                        } catch (Exception e) {
-                            /* Retry with open if openLegacy doesn't exist/fails */
-                            Log.v(TAG, "openLegacy failed due to " + e.getMessage()
-                                    + ", using open instead");
                             mCamera = android.hardware.Camera.open(msg.arg1);
+                        } catch (Exception e) {
+                            /* Retry with openLegacy if open fails */
+                            Log.i(TAG, "open failed due to " + e.getMessage()
+                                    + ", using openLegacy instead");
+                            try {
+                                Method openMethod = Class.forName("android.hardware.Camera").getMethod(
+                                        "openLegacy", int.class, int.class);
+                                mCamera = (android.hardware.Camera) openMethod.invoke(
+                                        null, msg.arg1, CAMERA_HAL_API_VERSION_1_0);
+                            } catch (Exception e) {
+                                Log.e(TAG, "openLegacy failed due to " + e.getMessage());
+                            }
                         }
-
                         if (mCamera != null) {
                             mParametersIsDirty = true;
 
