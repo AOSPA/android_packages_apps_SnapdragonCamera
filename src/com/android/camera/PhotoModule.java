@@ -266,6 +266,8 @@ public class PhotoModule
     private byte[] mLastJpegData;
     private int mLastJpegOrientation = 0;
 
+    private boolean mLibraryLoaded = false;
+
     private static Context mApplicationContext = null;
 
     private Runnable mDoSnapRunnable = new Runnable() {
@@ -648,11 +650,18 @@ public class PhotoModule
         if (mCameraState == SNAPSHOT_IN_PROGRESS) {
             return;
         }
+        loadNativeLibrary();
         setCameraState(IDLE);
         mFocusManager.onPreviewStarted();
         startFaceDetection();
         locationFirstRun();
         mUI.enableShutter(true);
+    }
+
+    private void loadNativeLibrary() {
+        if (mLibraryLoaded) return;
+        System.loadLibrary("opcameralib");
+        mLibraryLoaded = true;
     }
 
     // Prompt the user to pick to record location for the very first run of

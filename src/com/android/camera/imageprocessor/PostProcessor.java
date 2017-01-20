@@ -507,5 +507,6 @@ public class PostProcessor implements ImageReader.OnImageAvailableListener{
 
     static {
         System.loadLibrary("jni_imageutil");
+        System.loadLibrary("opbaselib");
     }
 }
