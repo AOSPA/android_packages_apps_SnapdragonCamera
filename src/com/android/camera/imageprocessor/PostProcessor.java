@@ -41,6 +41,7 @@ import android.media.ImageReader;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -57,6 +58,8 @@ import com.android.camera.imageprocessor.filter.SharpshooterFilter;
 import com.android.camera.imageprocessor.filter.StillmoreFilter;
 import com.android.camera.imageprocessor.filter.UbifocusFilter;
 import com.android.camera.ui.RotateTextToast;
+
+import org.codeaurora.snapcam.R;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
@@ -99,6 +102,8 @@ public class PostProcessor implements ImageReader.OnImageAvailableListener{
     private PhotoModule.NamedImages mNamedImages;
     private WatchdogThread mWatchdog;
     private int mOrientation = 0;
+
+    private boolean mLibraryLoaded = false;
 
     //This is for the debug feature.
     private static boolean DEBUG_FILTER = false;
@@ -421,6 +426,13 @@ public class PostProcessor implements ImageReader.OnImageAvailableListener{
         mCurrentNumImage = 0;
     }
 
+    private void loadLibrary() {
+        String library = mActivity.getString(R.string.postproc_library);
+        if (mLibraryLoaded || TextUtils.isEmpty(library)) return;
+        System.loadLibrary(library);
+        mLibraryLoaded = true;
+    }
+
     private void processImage(final String title, final long date,
                              final MediaSaveService.OnMediaSavedListener mediaSavedListener,
                              final ContentResolver contentResolver) {
@@ -429,6 +441,7 @@ public class PostProcessor implements ImageReader.OnImageAvailableListener{
         }
         final ProcessorHandler handler = mHandler;
         mHandler.post(new Runnable() {
+            @Override
             public void run() {
                 byte[] bytes;
                 ImageFilter.ResultImage resultImage = null;
@@ -436,6 +449,7 @@ public class PostProcessor implements ImageReader.OnImageAvailableListener{
                     if (!handler.isRunning) {
                         return;
                     }
+                    loadLibrary();
                     if (mFilter == null) { //In case no post filter is chosen
                         resultImage = mDefaultResultImage;
                     } else {
