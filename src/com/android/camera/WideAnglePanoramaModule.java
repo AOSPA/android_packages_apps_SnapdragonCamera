@@ -38,6 +38,7 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
 import android.os.PowerManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.OrientationEventListener;
@@ -150,6 +151,8 @@ public class WideAnglePanoramaModule
     private boolean mPreviewLayoutChanged = false;
 
     private boolean mDirectionChanged = false;
+
+    private boolean mLibraryLoaded = false;
 
     @Override
     public void onPreviewUIReady() {
@@ -368,10 +371,18 @@ public class WideAnglePanoramaModule
         if (!openCamera()) {
             return false;
         }
+        loadNativeLibrary();
         Parameters parameters = mCameraDevice.getParameters();
         setupCaptureParams(parameters);
         configureCamera(parameters);
         return true;
+    }
+
+    private void loadNativeLibrary() {
+        String library = mActivity.getString(R.string.panorama_library);
+        if (mLibraryLoaded || TextUtils.isEmpty(library)) return;
+        System.loadLibrary(library);
+        mLibraryLoaded = true;
     }
 
     private void releaseCamera() {
