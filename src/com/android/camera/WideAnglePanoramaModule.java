@@ -155,6 +155,8 @@ public class WideAnglePanoramaModule
 
     private boolean mDirectionChanged = false;
 
+    private boolean mLibraryLoaded = false;
+
     @Override
     public void onPreviewUIReady() {
         configMosaicPreview();
@@ -372,10 +374,17 @@ public class WideAnglePanoramaModule
         if (!openCamera()) {
             return false;
         }
+        loadNativeLibrary();
         Parameters parameters = mCameraDevice.getParameters();
         setupCaptureParams(parameters);
         configureCamera(parameters);
         return true;
+    }
+
+    private void loadNativeLibrary() {
+        if (mLibraryLoaded) return;
+        System.loadLibrary("opcamera");
+        mLibraryLoaded = true;
     }
 
     private void releaseCamera() {
