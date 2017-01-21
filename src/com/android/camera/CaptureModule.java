@@ -546,8 +546,6 @@ public class CaptureModule implements CameraModule, PhotoController,
                 // AF_PASSIVE is added for continous auto focus mode
                 if (CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED == afState ||
                         CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED == afState ||
-                        CaptureResult.CONTROL_AF_STATE_PASSIVE_FOCUSED == afState ||
-                        CaptureResult.CONTROL_AF_STATE_PASSIVE_UNFOCUSED == afState ||
                         (mLockRequestHashCode[id] == result.getRequest().hashCode() &&
                                 afState == CaptureResult.CONTROL_AF_STATE_INACTIVE)) {
                     if(id == MONO_ID && getCameraMode() == DUAL_MODE && isBackCamera()) {
@@ -1122,10 +1120,12 @@ public class CaptureModule implements CameraModule, PhotoController,
 
             Location location = mLocationManager.getCurrentLocation();
             if(location != null) {
-                Log.d(TAG, "captureStillPicture gps: " + location.toString());
+                // make copy so that we don't alter the saved location since we may re-use it
+                location = new Location(location);
                 // workaround for Google bug. Need to convert timestamp from ms -> sec
                 location.setTime(location.getTime()/1000);
                 captureBuilder.set(CaptureRequest.JPEG_GPS_LOCATION, location);
+                Log.d(TAG, "captureStillPicture gps: " + location.toString());
             } else {
                 Log.d(TAG, "captureStillPicture no location - getRecordLocation: " + getRecordLocation());
             }
@@ -1749,6 +1749,7 @@ public class CaptureModule implements CameraModule, PhotoController,
             mState[i] = STATE_PREVIEW;
         }
         mLongshotActive = false;
+        mZoomValue = 1.0f;
     }
 
     private void setCurrentMode() {

@@ -29,7 +29,6 @@
 
 package org.codeaurora.snapcam.filter;
 
-import java.io.IOException;
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayDeque;
@@ -52,6 +51,7 @@ import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CaptureFailure;
 import android.hardware.camera2.CaptureRequest;
+import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.InputConfiguration;
 import android.hardware.camera2.params.StreamConfigurationMap;
@@ -145,6 +145,7 @@ public class ClearSightImageProcessor {
     private boolean mDumpImages;
     private boolean mDumpYUV;
     private boolean mIsClosing;
+    private int mFinishReprocessNum;
 
     private static ClearSightImageProcessor mInstance;
 
@@ -479,6 +480,7 @@ public class ClearSightImageProcessor {
             switch (msg.what) {
             case MSG_START_CAPTURE:
                 mCaptureDone = false;
+                mFinishReprocessNum = 0;
                 mHasFailures = false;
                 mReprocessingPairCount = 0;
                 mReprocessedBayerCount = 0;
@@ -599,13 +601,31 @@ public class ClearSightImageProcessor {
                 checkForValidFramePairAndReprocess();
             }
 
-            Log.d(TAG, "processNewCaptureEvent - imagestoprocess[bayer] " + mNumImagesToProcess[CAM_TYPE_BAYER] +
-                    " imagestoprocess[mono]: " + mNumImagesToProcess[CAM_TYPE_MONO]);
+
+            Log.d(TAG, "processNewCaptureEvent - " +
+                    "imagestoprocess[bayer] " + mNumImagesToProcess[CAM_TYPE_BAYER] +
+                    " imagestoprocess[mono]: " + mNumImagesToProcess[CAM_TYPE_MONO] +
+                    " mReprocessingPairCount: " + mReprocessingPairCount +
+                    " mNumFrameCount: " + mNumFrameCount +
+                    " mFinishReprocessNum" + mFinishReprocessNum);
+
+            if ((mNumImagesToProcess[CAM_TYPE_BAYER] == 0
+                    && mNumImagesToProcess[CAM_TYPE_MONO] == 0)
+                    && mReprocessingPairCount != mNumFrameCount) {
+                while (!mBayerFrames.isEmpty() && !mMonoFrames.isEmpty()
+                        && mReprocessingPairCount != mNumFrameCount) {
+                    checkForValidFramePairAndReprocess();
+                }
+            }
 
             if (mReprocessingPairCount == mNumFrameCount ||
                     (mNumImagesToProcess[CAM_TYPE_BAYER] == 0
                     && mNumImagesToProcess[CAM_TYPE_MONO] == 0)) {
                 processFinalPair();
+                if (mReprocessingPairCount != 0 &&
+                        mFinishReprocessNum == mReprocessingPairCount * 2) {
+                    checkReprocessDone();
+                }
             }
         }
 
@@ -623,18 +643,26 @@ public class ClearSightImageProcessor {
                 ReprocessableImage bayer = mBayerFrames.peek();
                 ReprocessableImage mono = mMonoFrames.peek();
 
+                long bayerTsSOF = bayer.mCaptureResult.get(CaptureResult.SENSOR_TIMESTAMP);
+                long bayerTsEOF = bayerTsSOF + bayer.mCaptureResult.get(
+                        CaptureResult.SENSOR_EXPOSURE_TIME);
+                long monoTsSOF = mono.mCaptureResult.get(CaptureResult.SENSOR_TIMESTAMP);
+                long monoTsEOF = monoTsSOF + mono.mCaptureResult.get(
+                        CaptureResult.SENSOR_EXPOSURE_TIME);
+
+
                 Log.d(TAG,
-                        "checkForValidFramePair - bayer ts: "
-                                + bayer.mImage.getTimestamp() + " mono ts: "
-                                + mono.mImage.getTimestamp());
+                        "checkForValidFramePair - bayer ts SOF: "
+                                + bayerTsSOF + ", EOF: " + bayerTsEOF
+                                + ", mono ts SOF: " + monoTsSOF + ", EOF: " + monoTsEOF);
                 Log.d(TAG,
-                        "checkForValidFramePair - difference: "
-                                + Math.abs(bayer.mImage.getTimestamp()
-                                        - mono.mImage.getTimestamp()));
+                        "checkForValidFramePair - difference SOF: "
+                                + Math.abs(bayerTsSOF - monoTsSOF)
+                                + ", EOF: " + Math.abs(bayerTsEOF - monoTsEOF));
                 // if timestamps are within threshold, keep frames
-                if (Math.abs(bayer.mImage.getTimestamp()
-                        - mono.mImage.getTimestamp()) > mTimestampThresholdNs) {
-                    if(bayer.mImage.getTimestamp() > mono.mImage.getTimestamp()) {
+                if ((Math.abs(bayerTsSOF - monoTsSOF) > mTimestampThresholdNs) &&
+                        (Math.abs(bayerTsEOF - monoTsEOF) > mTimestampThresholdNs)) {
+                    if(bayerTsSOF > monoTsSOF) {
                         Log.d(TAG, "checkForValidFramePair - toss mono");
                         // no match, toss
                         mono = mMonoFrames.poll();
@@ -800,7 +828,7 @@ public class ClearSightImageProcessor {
                 Log.d(TAG, "reprocess - setReferenceResult: " + msg.obj);
                 ClearSightNativeEngine.getInstance().setReferenceResult(isBayer, result);
             }
-
+            mFinishReprocessNum++;
             checkReprocessDone();
         }
 
@@ -810,6 +838,7 @@ public class ClearSightImageProcessor {
             mReprocessingRequests.remove(failure.getRequest());
             mReprocessingFrames.delete(msg.arg2);
             mHasFailures = true;
+            mFinishReprocessNum++;
             checkReprocessDone();
         }
 
@@ -903,6 +932,12 @@ public class ClearSightImageProcessor {
             mImageEncodeHandler.obtainMessage(MSG_START_CAPTURE).sendToTarget();
 
             short encodeRequest = 0;
+            /* In same case, timeout will reset ClearSightNativeEngine object, so fields
+               in the object is not initial, need to return and skip process.
+            */
+            if (ClearSightNativeEngine.getInstance().getReferenceImage(true) == null) {
+                return;
+            }
             long csTs = ClearSightNativeEngine.getInstance().getReferenceImage(true).getTimestamp();
             CaptureRequest.Builder csRequest = createEncodeReprocRequest(
                     ClearSightNativeEngine.getInstance().getReferenceResult(true), CAM_TYPE_BAYER);
