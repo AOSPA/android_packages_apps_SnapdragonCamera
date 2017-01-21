@@ -1696,6 +1696,8 @@ public class PhotoModule
             CameraUtil.setGpsParameters(mParameters, loc);
 
             if (mRefocus) {
+                // Disable focus bracketing before attempting to use ubifocus
+                mParameters.remove(CameraSettings.KEY_QC_AF_BRACKETING);
                 mParameters.set(CameraSettings.KEY_QC_LEGACY_BURST,
                         CameraSettings.KEY_QC_RE_FOCUS_COUNT);
             } else {
