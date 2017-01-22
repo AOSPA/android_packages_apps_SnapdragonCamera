@@ -384,4 +384,12 @@
             camera:title="@string/pref_camera2_camera2_title"
             camera:entries="@array/pref_camera2_camera2_entries"
             camera:entryValues="@array/pref_camera2_camera2_entryvalues" />
+
+    <IconListPreference
+            camera:key="pref_grid"
+            camera:defaultValue="@string/pref_grid_default"
+            camera:title="@string/pref_grid_title"
+            camera:entries="@array/pref_switch_entries"
+            camera:entryValues="@array/pref_switch_entryvalues"
+            camera:singleIcon="@drawable/ic_settings_grid" />
 </PreferenceGroup>
