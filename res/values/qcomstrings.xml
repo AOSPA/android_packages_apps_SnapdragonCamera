@@ -421,7 +421,7 @@
      <string name="pref_camera_hfr_value_hsr_240">hsr240</string>
 
      <!-- Default noise reduction setting. Do not translate. -->
-     <string name="pref_camera_noise_reduction_default">off</string>
+     <string name="pref_camera_noise_reduction_default">high-quality</string>
 
      <!-- Settings screen, Select See More title -->
      <string name="pref_camera_noise_reduction_title">Noise Reduction</string>
@@ -486,7 +486,7 @@
      <string name="pref_camera_antibanding_title">Anti Banding</string>
 
      <!-- Default Anti Banding setting. -->
-     <string name="pref_camera_antibanding_default">off</string>
+     <string name="pref_camera_antibanding_default">auto</string>
 
      <!-- Settings screen, Anti Banding entries -->
      <string name="pref_camera_antibanding_entry_0">Off</string>
@@ -533,7 +533,7 @@
 
     <!-- Select IS title -->
     <string name="pref_camera_dis_title">Image Stabilization</string>
-    <string name="pref_camera_dis_default">disable</string>
+    <string name="pref_camera_dis_default">enable</string>
 
     <!-- DIS choices -->
     <string name="pref_camera_dis_entry_off">Off</string>
