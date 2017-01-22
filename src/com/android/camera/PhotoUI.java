@@ -476,6 +476,10 @@ public class PhotoUI implements PieListener,
         RectF r = new RectF(mSurfaceView.getLeft(), mSurfaceView.getTop(),
                 mSurfaceView.getRight(), mSurfaceView.getBottom());
         mController.onPreviewRectChanged(CameraUtil.rectFToRect(r));
+        final GridView view = mActivity.getGridView();
+        if (view != null) {
+            view.setBounds(r);
+        }
     }
 
     @Override

@@ -629,6 +629,8 @@ public class PhotoModule
         if (mApplicationContext != null) {
             mLgeHdrMode = mApplicationContext.getResources().getBoolean(R.bool.lge_hdr_mode);
         }
+
+        mActivity.showGrid(mPreferences);
     }
 
     private void initializeControlByIntent() {
@@ -2671,6 +2673,8 @@ public class PhotoModule
         // and startPreview hasn't been called, then this is a no-op.
         // (e.g. onResume -> onPause -> onResume).
         stopPreview();
+
+        mActivity.showGrid(mPreferences);
 
         mNamedImages = null;
 
@@ -4747,6 +4751,7 @@ public class PhotoModule
             setCameraParametersWhenIdle(UPDATE_PARAM_PREFERENCE);
             mUI.updateOnScreenIndicators(mParameters, mPreferenceGroup,
                 mPreferences);
+            mActivity.showGrid(mPreferences);
         } else {
             mHandler.sendEmptyMessage(SET_PHOTO_UI_PARAMS);
         }
