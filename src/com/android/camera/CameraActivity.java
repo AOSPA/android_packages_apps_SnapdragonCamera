@@ -209,6 +209,7 @@ public class CameraActivity extends Activity
     private View mCameraVideoModuleRootView;
     private View mCameraPanoModuleRootView;
     private View mCameraCaptureModuleRootView;
+    private GridView mCameraGridView;
     private FilmStripView mFilmStripView;
     private ProgressBar mBottomProgress;
     private View mPanoStitchingPanel;
@@ -1472,6 +1473,7 @@ public class CameraActivity extends Activity
         mCameraVideoModuleRootView = rootLayout.findViewById(R.id.camera_video_root);
         mCameraPanoModuleRootView = rootLayout.findViewById(R.id.camera_pano_root);
         mCameraCaptureModuleRootView = rootLayout.findViewById(R.id.camera_capture_root);
+        mCameraGridView = (GridView) rootLayout.findViewById(R.id.grid_lines);
 
         int moduleIndex = -1;
         if (MediaStore.INTENT_ACTION_VIDEO_CAMERA.equals(getIntent().getAction())
@@ -2322,5 +2324,21 @@ public class CameraActivity extends Activity
         return mCurrentModule;
     }
 
-    public SettingsManager getSettingsManager() {return  mSettingsManager;}
+    public SettingsManager getSettingsManager() {
+        return  mSettingsManager;
+    }
+
+    protected void showGrid(ComboPreferences prefs) {
+        final String value = prefs.getString(CameraSettings.KEY_GRID,
+                getResources().getString(R.string.pref_grid_default));
+        if (value.equals("on")) {
+            mCameraGridView.setVisibility(View.VISIBLE);
+        } else {
+            mCameraGridView.setVisibility(View.GONE);
+        }
+    }
+
+    protected GridView getGridView() {
+        return mCameraGridView;
+    }
 }
