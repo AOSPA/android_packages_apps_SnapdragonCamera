@@ -629,6 +629,11 @@ public class CaptureModule implements CameraModule, PhotoController,
         }
     }
 
+    public void unRegisterSettingsListener(){
+        mSettingsManager.unregisterListener(this);
+        mSettingsManager.unregisterListener(mUI);
+    }
+
     public void startFaceDetection() {
             mUI.onStartFaceDetection(mDisplayOrientation,
                     mSettingsManager.isFacingFront(getMainCameraId()),
@@ -891,8 +896,13 @@ public class CaptureModule implements CameraModule, PhotoController,
         applyAERegions(mPreviewRequestBuilder[id], id);
         mPreviewRequestBuilder[id].setTag(id);
         try {
-            mCaptureSession[id].setRepeatingRequest(mPreviewRequestBuilder[id]
-                    .build(), mCaptureCallback, mCameraHandler);
+            if(id == MONO_ID && !canStartMonoPreview()) {
+                mCaptureSession[id].capture(mPreviewRequestBuilder[id]
+                        .build(), mCaptureCallback, mCameraHandler);
+            } else {
+                mCaptureSession[id].setRepeatingRequest(mPreviewRequestBuilder[id]
+                        .build(), mCaptureCallback, mCameraHandler);
+            }
         } catch (CameraAccessException e) {
             e.printStackTrace();
         }
