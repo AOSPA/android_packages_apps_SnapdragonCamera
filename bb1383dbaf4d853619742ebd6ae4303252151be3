@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa81d914_8ac9eb5c",
+        "filename": "src/com/android/camera/AndroidCameraManagerImpl.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 1000012
+      },
+      "writtenOn": "2017-01-25T07:09:01Z",
+      "side": 1,
+      "message": "whitespace",
+      "revId": "bb1383dbaf4d853619742ebd6ae4303252151be3",
+      "serverId": "3162e3d8-d894-470e-abd9-724f7b0effad",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa81d914_eac0a72c",
+        "filename": "src/com/android/camera/AndroidCameraManagerImpl.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1000012
+      },
+      "writtenOn": "2017-01-25T07:09:01Z",
+      "side": 1,
+      "message": "whitespace",
+      "revId": "bb1383dbaf4d853619742ebd6ae4303252151be3",
+      "serverId": "3162e3d8-d894-470e-abd9-724f7b0effad",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa81d914_aac6af47",
+        "filename": "src/com/android/camera/AndroidCameraManagerImpl.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 223,
+      "author": {
+        "id": 1000012
+      },
+      "writtenOn": "2017-01-25T07:09:01Z",
+      "side": 1,
+      "message": "whitespace",
+      "revId": "bb1383dbaf4d853619742ebd6ae4303252151be3",
+      "serverId": "3162e3d8-d894-470e-abd9-724f7b0effad",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa81d914_cac3e336",
+        "filename": "src/com/android/camera/AndroidCameraManagerImpl.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 240,
+      "author": {
+        "id": 1000012
+      },
+      "writtenOn": "2017-01-25T07:09:01Z",
+      "side": 1,
+      "message": "whitespace",
+      "revId": "bb1383dbaf4d853619742ebd6ae4303252151be3",
+      "serverId": "3162e3d8-d894-470e-abd9-724f7b0effad",
+      "unresolved": false
+    }
+  ]
+}
