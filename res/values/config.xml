@@ -29,6 +29,9 @@
          of the fullscreen pano preview. -->
     <bool name="enable_warped_pano_preview">true</bool>
 
+    <!-- Enable support for camera api v2 -->
+    <bool name="support_camera_api_v2">false</bool>
+
     <!-- Set's manufacturer specific parameters on startup.
          Example: lge-camera=1;cam-mode=0 -->
     <string name="manufacturer_key_values"></string>
