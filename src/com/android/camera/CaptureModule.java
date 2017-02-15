@@ -459,6 +459,7 @@ public class CaptureModule implements CameraModule, PhotoController,
             if (id == getMainCameraId()) updateFocusStateChange(partialResult);
             Face[] faces = partialResult.get(CaptureResult.STATISTICS_FACES);
             updateFaceView(faces);
+            updateCaptureStateMachine(id, partialResult);
         }
 
         @Override
