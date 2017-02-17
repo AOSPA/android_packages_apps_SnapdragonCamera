@@ -487,17 +487,25 @@ public class CaptureUI implements FocusOverlayManager.FocusUI,
     protected void showCapturedImageForReview(byte[] jpegData, int orientation, boolean mirror) {
         mDecodeTaskForReview = new CaptureUI.DecodeImageForReview(jpegData, orientation, mirror);
         mDecodeTaskForReview.execute();
-        mPreviewLayout.setVisibility(View.VISIBLE);
-        CameraUtil.fadeIn(mReviewDoneButton);
-        CameraUtil.fadeIn(mReviewRetakeButton);
+        if (getCurrentIntentMode() != CaptureModule.INTENT_MODE_NORMAL) {
+            mPreviewLayout.setVisibility(View.VISIBLE);
+            CameraUtil.fadeIn(mReviewDoneButton);
+            CameraUtil.fadeIn(mReviewRetakeButton);
+        }
     }
 
     protected void showRecordVideoForReview(Bitmap preview) {
-        mReviewImage.setImageBitmap(preview);
-        mPreviewLayout.setVisibility(View.VISIBLE);
-        mReviewPlayButton.setVisibility(View.VISIBLE);
-        CameraUtil.fadeIn(mReviewDoneButton);
-        CameraUtil.fadeIn(mReviewRetakeButton);
+        if (getCurrentIntentMode() != CaptureModule.INTENT_MODE_NORMAL) {
+            mReviewImage.setImageBitmap(preview);
+            mPreviewLayout.setVisibility(View.VISIBLE);
+            mReviewPlayButton.setVisibility(View.VISIBLE);
+            CameraUtil.fadeIn(mReviewDoneButton);
+            CameraUtil.fadeIn(mReviewRetakeButton);
+        }
+    }
+
+    private int getCurrentIntentMode() {
+        return mModule.getCurrentIntentMode();
     }
 
     private void toggleMakeup() {
@@ -868,6 +876,7 @@ public class CaptureUI implements FocusOverlayManager.FocusUI,
 
     public void hideUIwhileRecording() {
         mCameraControls.setVideoMode(true);
+        mSceneModeLabelRect.setVisibility(View.INVISIBLE);
         mFrontBackSwitcher.setVisibility(View.INVISIBLE);
         mFilterModeSwitcher.setVisibility(View.INVISIBLE);
         mSceneModeSwitcher.setVisibility(View.INVISIBLE);
@@ -881,6 +890,7 @@ public class CaptureUI implements FocusOverlayManager.FocusUI,
 
     public void showUIafterRecording() {
         mCameraControls.setVideoMode(false);
+        mSceneModeLabelRect.setVisibility(View.VISIBLE);
         mFrontBackSwitcher.setVisibility(View.VISIBLE);
         mFilterModeSwitcher.setVisibility(View.VISIBLE);
         mSceneModeSwitcher.setVisibility(View.VISIBLE);
