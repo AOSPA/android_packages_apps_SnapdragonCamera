@@ -472,11 +472,13 @@ public class ClearSightImageProcessor {
         private int[] mNumImagesToProcess = new int[NUM_CAM];
         private boolean mCaptureDone;
         private boolean mHasFailures;
+        private Executor mExecutor;
 
         ImageProcessHandler(Looper looper) {
             super(looper);
             mReprocessingFrames[CAM_TYPE_BAYER] = new SparseLongArray();
             mReprocessingFrames[CAM_TYPE_MONO] = new SparseLongArray();
+            mExecutor = Executors.newFixedThreadPool(mNumFrameCount * 2);
         }
 
         @Override
@@ -683,11 +685,22 @@ public class ClearSightImageProcessor {
                     }
                 } else {
                     // send for reproc
-                    sendReprocessRequest(CAM_TYPE_BAYER, mBayerFrames.poll());
-                    sendReprocessRequest(CAM_TYPE_MONO, mMonoFrames.poll());
+                    asyncSendReprocessRequest(CAM_TYPE_BAYER, mBayerFrames.poll());
+                    asyncSendReprocessRequest(CAM_TYPE_MONO, mMonoFrames.poll());
                     mReprocessingPairCount++;
                 }
             }
+        }
+
+        private void asyncSendReprocessRequest(final int camId,
+                                               final ReprocessableImage reprocImg) {
+            (new AsyncTask<Void, Void, Void>() {
+                @Override
+                protected Void doInBackground(Void... params) {
+                    sendReprocessRequest(camId, reprocImg);
+                    return null;
+                }
+            }).executeOnExecutor(mExecutor);
         }
 
         private void sendReprocessRequest(final int camId, ReprocessableImage reprocImg) {
@@ -745,7 +758,7 @@ public class ClearSightImageProcessor {
                                 MSG_NEW_REPROC_FAIL, camId, ts.intValue(), failure)
                                 .sendToTarget();
                     }
-                }, null);
+                }, ImageProcessHandler.this);
 
                 mReprocessingRequests.add(request);
             } catch (CameraAccessException e) {
