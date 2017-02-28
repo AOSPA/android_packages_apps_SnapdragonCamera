@@ -147,7 +147,7 @@ public class CaptureModule implements CameraModule, PhotoController,
     public static final int INTENT_MODE_CAPTURE_SECURE = 3;
     private static final int BACK_MODE = 0;
     private static final int FRONT_MODE = 1;
-    private static final int CANCEL_TOUCH_FOCUS_DELAY = 3000;
+    private static final int CANCEL_TOUCH_FOCUS_DELAY = 5000;
     private static final int OPEN_CAMERA = 0;
     private static final int CANCEL_TOUCH_FOCUS = 1;
     private static final int MAX_NUM_CAM = 3;
@@ -2121,6 +2121,7 @@ public class CaptureModule implements CameraModule, PhotoController,
 
     @Override
     public void onPauseBeforeSuper() {
+        cancelTouchFocus();
         mPaused = true;
         mToast = null;
         mUI.onPause();
@@ -2169,6 +2170,20 @@ public class CaptureModule implements CameraModule, PhotoController,
         mLongshotActive = false;
         mZoomValue = 1.0f;
         updatePreviewSurfaceReadyState(false);
+    }
+
+    private void cancelTouchFocus() {
+        if (getCameraMode() == DUAL_MODE) {
+            if(mState[BAYER_ID] == STATE_WAITING_TOUCH_FOCUS) {
+                cancelTouchFocus(BAYER_ID);
+            } else if (mState[MONO_ID] == STATE_WAITING_TOUCH_FOCUS) {
+                cancelTouchFocus(MONO_ID);
+            }
+        } else {
+            if (mState[getMainCameraId()] == STATE_WAITING_TOUCH_FOCUS) {
+                cancelTouchFocus(getMainCameraId());
+            }
+        }
     }
 
     private ArrayList<Integer> getFrameProcFilterId() {
@@ -4026,10 +4041,10 @@ public class CaptureModule implements CameraModule, PhotoController,
         String value = mSettingsManager.getValue(SettingsManager.KEY_ISO);
         if (value == null) return;
         if (value.equals("auto")) {
-            request.set(SELECT_PRIORITY, null);
-            request.set(ISO_EXP, null);
+            request.set(SELECT_PRIORITY, 0);
+            request.set(ISO_EXP, 0L);
         } else {
-            long intValue = Integer.parseInt(value);
+            long intValue = SettingsManager.KEY_ISO_INDEX.get(value);
             request.set(SELECT_PRIORITY, 0);
             request.set(ISO_EXP, intValue);
         }
