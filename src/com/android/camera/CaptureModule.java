@@ -2169,7 +2169,7 @@ public class CaptureModule implements CameraModule, PhotoController,
             mState[i] = STATE_PREVIEW;
         }
         mLongshotActive = false;
-        mZoomValue = 1.0f;
+        updateZoom();
         updatePreviewSurfaceReadyState(false);
     }
 
@@ -3004,6 +3004,16 @@ public class CaptureModule implements CameraModule, PhotoController,
         } else {
             // 1 minute = 60000ms
             mMaxVideoDurationInMs = 60000 * minutes;
+        }
+    }
+
+    private void updateZoom() {
+        String zoomStr = mSettingsManager.getValue(SettingsManager.KEY_ZOOM);
+        int zoom = Integer.parseInt(zoomStr);
+        if ( zoom !=0 ) {
+            mZoomValue = (float)zoom;
+        }else{
+            mZoomValue = 1.0f;
         }
     }
 
@@ -4448,8 +4458,14 @@ public class CaptureModule implements CameraModule, PhotoController,
 
     private Size getMaxPictureSizeLessThan4k() {
         Size[] sizes = mSettingsManager.getSupportedOutputSize(getMainCameraId(), ImageFormat.JPEG);
+        float ratio = (float) mVideoSize.getWidth() / mVideoSize.getHeight();
         for (Size size : sizes) {
-            if (!is4kSize(size)) return size;
+            if (!is4kSize(size)) {
+                float pictureRatio = (float) size.getWidth() / size.getHeight();
+                if (Math.abs(pictureRatio - ratio) < 0.01) {
+                    return size;
+                }
+            }
         }
         return sizes[sizes.length - 1];
     }
