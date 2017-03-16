@@ -147,7 +147,7 @@ public interface CameraManager {
      * @param hal3 The indication as to whether HAL3 should be used instead of openLegacy.
      *
      */
-    public void setHal3(boolean hal3);
+    public void setHal3(boolean back, boolean front);
 
     /**
      * Opens the camera of the specified ID synchronously.
