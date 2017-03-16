@@ -50,5 +50,6 @@
     <integer name="minimum_picture_size">900000</integer>
 
     <!-- Enable HAL3 by default -->
-    <bool name="config_use_hal3">false</bool>
+    <bool name="config_use_hal3_back">false</bool>
+    <bool name="config_use_hal3_front">false</bool>
 </resources>

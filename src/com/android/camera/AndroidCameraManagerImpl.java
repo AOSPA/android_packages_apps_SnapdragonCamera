@@ -25,6 +25,7 @@ import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.hardware.Camera.AutoFocusCallback;
 import android.hardware.Camera.AutoFocusMoveCallback;
+import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.ErrorCallback;
 import android.hardware.Camera.FaceDetectionListener;
 import android.hardware.Camera.OnZoomChangeListener;
@@ -105,7 +106,8 @@ class AndroidCameraManagerImpl implements CameraManager {
     private CameraHandler mCameraHandler;
     private android.hardware.Camera mCamera;
 
-    private boolean mUseHal3;
+    private boolean mUseHal3Back;
+    private boolean mUseHal3Front;
 
     AndroidCameraManagerImpl() {
         HandlerThread ht = new HandlerThread("Camera Handler Thread");
@@ -114,8 +116,9 @@ class AndroidCameraManagerImpl implements CameraManager {
     }
 
     @Override
-    public void setHal3(boolean hal3) {
-        mUseHal3 = hal3;
+    public void setHal3(boolean back, boolean front) {
+        mUseHal3Back = back;
+        mUseHal3Front = front;
     }
 
     private class CameraHandler extends Handler {
@@ -213,8 +216,12 @@ class AndroidCameraManagerImpl implements CameraManager {
             try {
                 switch (msg.what) {
                     case OPEN_CAMERA:
+                        CameraInfo info = CameraHolder.instance().getCameraInfo()[msg.arg1];
+                        boolean useHal3 = (mUseHal3Back && info.facing == CameraInfo.CAMERA_FACING_BACK)
+                                || (mUseHal3Front && info.facing == CameraInfo.CAMERA_FACING_FRONT);
+
                         try {
-                            if (mUseHal3) {
+                            if (useHal3) {
                                 mCamera = Camera.open(msg.arg1);
                             } else {
                                 Method openMethod = Class.forName("android.hardware.Camera").getMethod(
@@ -225,8 +232,8 @@ class AndroidCameraManagerImpl implements CameraManager {
                         } catch (Exception e) {
                             /* Retry with openLegacy if open fails */
                             Log.i(TAG, "open failed due to " + e.getMessage()
-                                    + ", using" + (mUseHal3 ? "openLegacy" : "open") + "instead");
-                            if (mUseHal3) {
+                                    + ", using" + (useHal3 ? "openLegacy" : "open") + "instead");
+                            if (useHal3) {
                                 mCamera = android.hardware.Camera.open(msg.arg1);
                             } else {
                                 try {

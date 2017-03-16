@@ -1431,8 +1431,9 @@ public class CameraActivity extends Activity
     public void onCreate(Bundle state) {
         super.onCreate(state);
 
-        final boolean useHal3 = getResources().getBoolean(R.bool.config_use_hal3);
-        CameraManagerFactory.getAndroidCameraManager().setHal3(useHal3);
+        final boolean useHal3Back = getResources().getBoolean(R.bool.config_use_hal3_back);
+        final boolean useHal3Front = getResources().getBoolean(R.bool.config_use_hal3_front);
+        CameraManagerFactory.getAndroidCameraManager().setHal3(useHal3Back, useHal3Front);
 
         if (checkPermissions() || !mHasCriticalPermissions) {
             Log.v(TAG, "onCreate: Missing critical permissions.");
