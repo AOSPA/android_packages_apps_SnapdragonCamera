@@ -193,7 +193,6 @@ public class PhotoMenu extends MenuController
                 CameraSettings.KEY_QC_CHROMA_FLASH,
                 CameraSettings.KEY_REDEYE_REDUCTION,
                 CameraSettings.KEY_SELFIE_MIRROR,
-                CameraSettings.KEY_SHUTTER_SOUND,
                 CameraSettings.KEY_GRID
         };
 
