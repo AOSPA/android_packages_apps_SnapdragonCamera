@@ -35,6 +35,8 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import org.codeaurora.snapcam.filter.ClearSightNativeEngine.CamSystemCalibrationData;
 import org.codeaurora.snapcam.filter.ClearSightNativeEngine.ClearsightImage;
@@ -60,6 +62,7 @@ import android.media.Image.Plane;
 import android.media.ImageReader;
 import android.media.ImageReader.OnImageAvailableListener;
 import android.media.ImageWriter;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -106,6 +109,7 @@ public class ClearSightImageProcessor {
     private static final int MSG_NEW_REPROC_RESULT = 4;
     private static final int MSG_NEW_REPROC_FAIL = 5;
     private static final int MSG_END_CAPTURE = 6;
+    private static final int MSG_FINISH_CS_LIB_REGISTER = 7;
 
     private static final int CAM_TYPE_BAYER = 0;
     private static final int CAM_TYPE_MONO = 1;
@@ -468,11 +472,13 @@ public class ClearSightImageProcessor {
         private int[] mNumImagesToProcess = new int[NUM_CAM];
         private boolean mCaptureDone;
         private boolean mHasFailures;
+        private Executor mExecutor;
 
         ImageProcessHandler(Looper looper) {
             super(looper);
             mReprocessingFrames[CAM_TYPE_BAYER] = new SparseLongArray();
             mReprocessingFrames[CAM_TYPE_MONO] = new SparseLongArray();
+            mExecutor = Executors.newFixedThreadPool(mNumFrameCount * 2);
         }
 
         @Override
@@ -679,11 +685,22 @@ public class ClearSightImageProcessor {
                     }
                 } else {
                     // send for reproc
-                    sendReprocessRequest(CAM_TYPE_BAYER, mBayerFrames.poll());
-                    sendReprocessRequest(CAM_TYPE_MONO, mMonoFrames.poll());
+                    asyncSendReprocessRequest(CAM_TYPE_BAYER, mBayerFrames.poll());
+                    asyncSendReprocessRequest(CAM_TYPE_MONO, mMonoFrames.poll());
                     mReprocessingPairCount++;
                 }
             }
+        }
+
+        private void asyncSendReprocessRequest(final int camId,
+                                               final ReprocessableImage reprocImg) {
+            (new AsyncTask<Void, Void, Void>() {
+                @Override
+                protected Void doInBackground(Void... params) {
+                    sendReprocessRequest(camId, reprocImg);
+                    return null;
+                }
+            }).executeOnExecutor(mExecutor);
         }
 
         private void sendReprocessRequest(final int camId, ReprocessableImage reprocImg) {
@@ -741,7 +758,7 @@ public class ClearSightImageProcessor {
                                 MSG_NEW_REPROC_FAIL, camId, ts.intValue(), failure)
                                 .sendToTarget();
                     }
-                }, null);
+                }, ImageProcessHandler.this);
 
                 mReprocessingRequests.add(request);
             } catch (CameraAccessException e) {
@@ -874,50 +891,86 @@ public class ClearSightImageProcessor {
 
     private class ClearsightRegisterHandler extends Handler {
         private NamedEntity mNamedEntity;
+        private int mRegisterPenddingCount;
+        private boolean mCaptureFinish;
+        private Executor mExecutor;
 
         ClearsightRegisterHandler(Looper looper) {
             super(looper);
+            mExecutor = Executors.newFixedThreadPool(mNumFrameCount * 2);
         }
 
         @Override
         public void handleMessage(Message msg) {
-            if(isClosing()) return;
+            if (isClosing()) return;
 
             switch (msg.what) {
-            case MSG_START_CAPTURE:
-                mNamedEntity = (NamedEntity) msg.obj;
-                break;
-            case MSG_NEW_IMG:
-                registerImage(msg);
-                break;
-            case MSG_END_CAPTURE:
-                // Check if timeout
-                if(msg.arg2 == 1) {
-                    Log.d(TAG, "ClearsightRegisterHandler - handleTimeout");
-                    ClearSightNativeEngine.getInstance().reset();
-                    if(mCallback != null) mCallback.onClearSightFailure(null);
-                } else {
-                    mClearsightProcessHandler.obtainMessage(MSG_START_CAPTURE,
-                            msg.arg1, 0, mNamedEntity).sendToTarget();
-                }
-                break;
+                case MSG_START_CAPTURE:
+                    Log.d(TAG, "MSG_START_CAPTURE - mRegisterPenddingCount = "
+                            + mRegisterPenddingCount);
+                    mCaptureFinish = false;
+                    mRegisterPenddingCount = 0;
+                    mNamedEntity = (NamedEntity) msg.obj;
+                    break;
+                case MSG_NEW_IMG:
+                    Log.d(TAG, "MSG_NEW_IMG - mRegisterPenddingCount = "
+                            + mRegisterPenddingCount);
+                    registerImage(msg);
+                    break;
+                case MSG_FINISH_CS_LIB_REGISTER:
+                    Log.d(TAG, "MSG_FINISH_CS_LIB_REGISTER - mRegisterPenddingCount = "
+                            + mRegisterPenddingCount + ", mCaptureFinish = " + mCaptureFinish);
+                    mRegisterPenddingCount--;
+                    if (mRegisterPenddingCount == 0 && mCaptureFinish) {
+                        mClearsightProcessHandler.obtainMessage(MSG_START_CAPTURE,
+                                msg.arg1, 0, mNamedEntity).sendToTarget();
+                    }
+                    break;
+                case MSG_END_CAPTURE:
+                    Log.d(TAG, "MSG_END_CAPTURE - mCaptureFinish = " + mCaptureFinish +
+                            ", mRegisterPenddingCount = " + mRegisterPenddingCount);
+                    // Check if timeout
+                    mCaptureFinish = true;
+                    if (msg.arg2 == 1) {
+                        Log.d(TAG, "ClearsightRegisterHandler - handleTimeout");
+                        ClearSightNativeEngine.getInstance().reset();
+                        if (mCallback != null) mCallback.onClearSightFailure(null);
+                    } else if (mRegisterPenddingCount == 0) {
+                        mClearsightProcessHandler.obtainMessage(MSG_START_CAPTURE,
+                                msg.arg1, 0, mNamedEntity).sendToTarget();
+                    }
+                    break;
             }
         }
 
+        private void asyncRegisterImage(final int camId, final Image image) {
+            final boolean isBayer = (camId == CAM_TYPE_BAYER);
+            (new AsyncTask<Void, Void, Void>() {
+                @Override
+                protected Void doInBackground(Void... params) {
+                    if(ClearSightNativeEngine.getInstance().registerImage(
+                            isBayer, image) == false) {
+                        Log.w(TAG, "registerImage : terminal error with input image");
+                    }
+                    ClearsightRegisterHandler.this.obtainMessage(MSG_FINISH_CS_LIB_REGISTER,
+                            camId, 0).sendToTarget();
+                    return null;
+                }
+            }).executeOnExecutor(mExecutor);
+        }
+
         private void registerImage(Message msg) {
-            boolean isBayer = (msg.arg1 == CAM_TYPE_BAYER);
-            Image image = (Image)msg.obj;
+            final boolean isBayer = (msg.arg1 == CAM_TYPE_BAYER);
+            final Image image = (Image)msg.obj;
 
             if (!ClearSightNativeEngine.getInstance()
                     .hasReferenceImage(isBayer)) {
                 // reference not yet set
                 ClearSightNativeEngine.getInstance().setReferenceImage(isBayer, image);
             } else {
+                mRegisterPenddingCount++;
                 // if ref images set, register this image
-                if(ClearSightNativeEngine.getInstance().registerImage(
-                        isBayer, image) == false) {
-                    Log.w(TAG, "registerImage : terminal error with input image");
-                }
+                asyncRegisterImage(msg.arg1, image);
             }
         }
     }
