@@ -3962,6 +3962,8 @@ public class PhotoModule
                 .pref_camera_advanced_feature_value_refocus_on);
         String optizoomOn = mActivity.getString(R.string
                 .pref_camera_advanced_feature_value_optizoom_on);
+        String hdrAuto = mActivity.getString(R.string
+                .pref_camera_feature_hdr_auto);
         if (refocusOn.equals(mSceneMode)) {
             try {
                 mSceneMode = Parameters.SCENE_MODE_AUTO;
@@ -3979,6 +3981,12 @@ public class PhotoModule
                 }
             } catch (NullPointerException e) {
             }
+        } else if (hdrAuto.equals(mSceneMode)){
+            try {
+                if (mHandler.getLooper() == Looper.myLooper()) {
+                    mUI.setPreference(CameraSettings.KEY_ADVANCED_FEATURES, hdrAuto);
+                }
+            } catch (NullPointerException e) { }
         } else if (mSceneMode == null) {
             mSceneMode = Parameters.SCENE_MODE_AUTO;
         }
