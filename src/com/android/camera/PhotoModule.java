@@ -134,7 +134,6 @@ public class PhotoModule
     public boolean mFaceDetectionEnabled = false;
     private boolean mLgeHdrMode = false;
     private boolean mUseAbsoluteSharpness = false;
-    private DrawAutoHDR mDrawAutoHDR;
    /*Histogram variables*/
     private GraphView mGraphView;
     private static final int STATS_DATA = 257;
@@ -180,7 +179,6 @@ public class PhotoModule
 
     private PhotoUI mUI;
 
-    public boolean mAutoHdrEnable;
     // The activity is going to switch to the specified camera id. This is
     // needed because texture copy is done in GL thread. -1 means camera is not
     // switching.
@@ -328,7 +326,6 @@ public class PhotoModule
 
     private final CameraErrorCallback mErrorCallback = new CameraErrorCallback();
     private final StatsCallback mStatsCallback = new StatsCallback();
-    private final MetaDataCallback mMetaDataCallback = new MetaDataCallback();
     private long mFocusStartTime;
     private long mShutterCallbackTime;
     private long mPostViewPictureCallbackTime;
@@ -955,12 +952,10 @@ public class PhotoModule
 
         mNamedImages = new NamedImages();
         mGraphView = (GraphView)mRootView.findViewById(R.id.graph_view);
-        mDrawAutoHDR = (DrawAutoHDR )mRootView.findViewById(R.id.autohdr_view);
-        if (mGraphView == null || mDrawAutoHDR == null){
-            Log.e(TAG, "mGraphView or mDrawAutoHDR is null");
+        if (mGraphView == null) {
+            Log.e(TAG, "mGraphView is null");
         } else{
             mGraphView.setPhotoModuleObject(this);
-            mDrawAutoHDR.setPhotoModuleObject(this);
         }
 
         createCaptureThread();
@@ -1177,49 +1172,6 @@ public class PhotoModule
                         mGraphView.PreviewChanged();
                 }
            });
-        }
-    }
-
-    private final class MetaDataCallback
-           implements android.hardware.Camera.CameraMetaDataCallback{
-        @Override
-        public void onCameraMetaData (byte[] data, android.hardware.Camera camera) {
-            int metadata[] = new int[3];
-            if (data.length >= 12) {
-                for (int i =0;i<3;i++) {
-                    metadata[i] = byteToInt( (byte []) data, i*4);
-                }
-                /* Checking if the meta data is for auto HDR */
-                if (metadata[0] == 3) {
-                    if (metadata[2] == 1) {
-                        mAutoHdrEnable = true;
-                        mActivity.runOnUiThread(new Runnable() {
-                            public void run() {
-                                if (mDrawAutoHDR != null)
-                                    mDrawAutoHDR.AutoHDR();
-                            }
-                        });
-                    }
-                    else {
-                        mAutoHdrEnable = false;
-                        mActivity.runOnUiThread(new Runnable() {
-                            public void run() {
-                                if (mDrawAutoHDR != null)
-                                    mDrawAutoHDR.AutoHDR();
-                            }
-                        });
-                    }
-                }
-            }
-        }
-
-        private int byteToInt (byte[] b, int offset) {
-            int value = 0;
-            for (int i = 0; i < 4; i++) {
-                int shift = (4 - 1 - i) * 8;
-                value += (b[(3-i) + offset] & 0x000000FF) << shift;
-            }
-            return value;
         }
     }
 
@@ -3581,25 +3533,7 @@ public class PhotoModule
         if (CameraUtil.isAutoHDRSupported(mParameters)) {
             mParameters.set("auto-hdr-enable",auto_hdr);
             if (auto_hdr.equals("enable")) {
-                mActivity.runOnUiThread(new Runnable() {
-                    public void run() {
-                        if (mDrawAutoHDR != null) {
-                            mDrawAutoHDR.setVisibility(View.VISIBLE);
-                        }
-                    }
-                });
                 mParameters.setSceneMode("asd");
-                mCameraDevice.setMetadataCb(mMetaDataCallback);
-            }
-            else {
-                mAutoHdrEnable = false;
-                mActivity.runOnUiThread( new Runnable() {
-                    public void run () {
-                        if (mDrawAutoHDR != null) {
-                            mDrawAutoHDR.setVisibility (View.INVISIBLE);
-                        }
-                    }
-                });
             }
         }
         mParameters.setZSLMode(zsl);
@@ -5175,46 +5109,6 @@ class GraphView extends View {
         invalidate();
     }
     public void setPhotoModuleObject(PhotoModule photoModule) {
-        mPhotoModule = photoModule;
-    }
-}
-
-class DrawAutoHDR extends View{
-
-    private static final String TAG = "AutoHdrView";
-    private PhotoModule mPhotoModule;
-
-    public DrawAutoHDR (Context context, AttributeSet attrs) {
-        super(context,attrs);
-    }
-
-    @Override
-    protected void onDraw (Canvas canvas) {
-        if (mPhotoModule == null)
-            return;
-        if (mPhotoModule.mAutoHdrEnable) {
-            Paint AutoHDRPaint = new Paint();
-            AutoHDRPaint.setColor(Color.WHITE);
-            AutoHDRPaint.setAlpha (0);
-            canvas.drawPaint(AutoHDRPaint);
-            AutoHDRPaint.setStyle(Paint.Style.STROKE);
-            AutoHDRPaint.setColor(Color.MAGENTA);
-            AutoHDRPaint.setStrokeWidth(1);
-            AutoHDRPaint.setTextSize(32);
-            AutoHDRPaint.setAlpha (255);
-            canvas.drawText("HDR On",200,100,AutoHDRPaint);
-        }
-        else {
-            super.onDraw(canvas);
-            return;
-        }
-    }
-
-    public void AutoHDR () {
-        invalidate();
-    }
-
-    public void setPhotoModuleObject (PhotoModule photoModule) {
         mPhotoModule = photoModule;
     }
 }
