@@ -998,6 +998,10 @@ public class CameraSettings {
                 supportedSceneModes.add(mContext.getString(R.string
                             .pref_camera_advanced_feature_value_optizoom_on));
             }
+            if (CameraUtil.isCameraHdrAutoSupported(mParameters)) {
+                supportedSceneModes.add(mContext.getString(R.string
+                        .pref_camera_feature_hdr_auto));
+            }
             filterUnsupportedOptions(group, sceneMode, supportedSceneModes);
         }
         if (flashMode != null) {

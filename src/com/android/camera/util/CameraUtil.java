@@ -154,6 +154,11 @@ public class CameraUtil {
         return (supported != null) && supported.contains(SCENE_MODE_HDR);
     }
 
+    public static boolean isCameraHdrAutoSupported(Parameters params) {
+        List<String> supported = params.getSupportedSceneModes();
+        return supported != null && supported.contains("hdr-auto");
+    }
+
     public static boolean isMeteringAreaSupported(Parameters params) {
         return params.getMaxNumMeteringAreas() > 0;
     }
