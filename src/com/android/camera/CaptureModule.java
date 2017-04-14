@@ -459,6 +459,7 @@ public class CaptureModule implements CameraModule, PhotoController,
             if (id == getMainCameraId()) updateFocusStateChange(partialResult);
             Face[] faces = partialResult.get(CaptureResult.STATISTICS_FACES);
             updateFaceView(faces);
+            updateCaptureStateMachine(id, partialResult);
         }
 
         @Override
@@ -545,30 +546,26 @@ public class CaptureModule implements CameraModule, PhotoController,
             case STATE_PREVIEW: {
                 break;
             }
-            case STATE_WAITING_AF_LOCK:
-            case STATE_WAITING_AE_LOCK: {
-                Log.d(TAG, "STATE_WAITING_AF_AE_LOCK id: " + id + " afState:"
-                        + afState + " aeState:" + aeState);
+            case STATE_WAITING_AF_LOCK: {
+                Log.d(TAG, "STATE_WAITING_AF_LOCK id: " + id + " afState:" + afState + " aeState:" + aeState);
                 // AF_PASSIVE is added for continous auto focus mode
                 if (CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED == afState ||
                         CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED == afState ||
                         (mLockRequestHashCode[id] == result.getRequest().hashCode() &&
                                 afState == CaptureResult.CONTROL_AF_STATE_INACTIVE)) {
-                    if (id == MONO_ID && getCameraMode() == DUAL_MODE && isBackCamera()) {
+                    if(id == MONO_ID && getCameraMode() == DUAL_MODE && isBackCamera()) {
                         // in dual mode, mono AE dictated by bayer AE.
                         // if not already locked, wait for lock update from bayer
-                        if (aeState == CaptureResult.CONTROL_AE_STATE_LOCKED)
+                        if(aeState == CaptureResult.CONTROL_AE_STATE_LOCKED)
                             checkAfAeStatesAndCapture(id);
                         else
                             mState[id] = STATE_WAITING_AE_LOCK;
                     } else {
+                        runPrecaptureSequence(id);
                         // CONTROL_AE_STATE can be null on some devices
-                        if (aeState == null || (aeState == CaptureResult
+                        if(aeState == null || (aeState == CaptureResult
                                 .CONTROL_AE_STATE_CONVERGED) && isFlashOff(id)) {
                             lockExposure(id);
-                        } else if (aeState == null
-                                || aeState == CaptureResult.CONTROL_AE_STATE_LOCKED) {
-                            checkAfAeStatesAndCapture(id);
                         } else {
                             runPrecaptureSequence(id);
                         }
@@ -578,14 +575,21 @@ public class CaptureModule implements CameraModule, PhotoController,
             }
             case STATE_WAITING_PRECAPTURE: {
                 // CONTROL_AE_STATE can be null on some devices
-                Log.d(TAG, "STATE_WAITING_PRECAPTURE id: " + id + " afState: "
-                        + afState + " aeState:" + aeState);
+                Log.d(TAG, "STATE_WAITING_PRECAPTURE id: " + id + " afState: " + afState + " aeState:" + aeState);
                 if (aeState == null ||
                         aeState == CaptureResult.CONTROL_AE_STATE_PRECAPTURE ||
                         aeState == CaptureResult.CONTROL_AE_STATE_FLASH_REQUIRED ||
                         aeState == CaptureResult.CONTROL_AE_STATE_CONVERGED) {
                     if (mPrecaptureRequestHashCode[id] == result.getRequest().hashCode())
                         lockExposure(id);
+                }
+                break;
+            }
+            case STATE_WAITING_AE_LOCK: {
+                // CONTROL_AE_STATE can be null on some devices
+                Log.d(TAG, "STATE_WAITING_AE_LOCK id: " + id + " afState: " + afState + " aeState:" + aeState);
+                if (aeState == null || aeState == CaptureResult.CONTROL_AE_STATE_LOCKED) {
+                    checkAfAeStatesAndCapture(id);
                 }
                 break;
             }
@@ -1015,7 +1019,6 @@ public class CaptureModule implements CameraModule, PhotoController,
         if (mState[id] == STATE_WAITING_TOUCH_FOCUS) {
             mCameraHandler.removeMessages(CANCEL_TOUCH_FOCUS, mCameraId[id]);
             mState[id] = STATE_WAITING_AF_LOCK;
-            lockExposure(id);
             return;
         }
 
@@ -1026,7 +1029,6 @@ public class CaptureModule implements CameraModule, PhotoController,
             addPreviewSurface(builder, null, id);
 
             applySettingsForLockFocus(builder, id);
-            applySettingsForLockExposure(builder, id);
             CaptureRequest request = builder.build();
             mLockRequestHashCode[id] = request.hashCode();
             mState[id] = STATE_WAITING_AF_LOCK;
