@@ -1500,6 +1500,8 @@ public class PhotoModule
                             exif.setTag(directionTag);
                         }
                         String mPictureFormat = mParameters.get(KEY_PICTURE_FORMAT);
+                        mParameters.set("image-file-path", Storage.generateFilepath(
+                                title, mPictureFormat));
                             mActivity.getMediaSaveService().addImage(
                                     jpegData, title, date, mLocation, width, height,
                                     orientation, exif, mOnMediaSavedListener,
