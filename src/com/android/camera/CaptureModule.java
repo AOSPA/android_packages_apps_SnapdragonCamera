@@ -147,7 +147,7 @@ public class CaptureModule implements CameraModule, PhotoController,
     public static final int INTENT_MODE_CAPTURE_SECURE = 3;
     private static final int BACK_MODE = 0;
     private static final int FRONT_MODE = 1;
-    private static final int CANCEL_TOUCH_FOCUS_DELAY = 5000;
+    private static final int CANCEL_TOUCH_FOCUS_DELAY = PersistUtil.getCancelTouchFocusDelay();
     private static final int OPEN_CAMERA = 0;
     private static final int CANCEL_TOUCH_FOCUS = 1;
     private static final int MAX_NUM_CAM = 3;
@@ -753,6 +753,9 @@ public class CaptureModule implements CameraModule, PhotoController,
                 break;
             }
             case STATE_WAITING_TOUCH_FOCUS:
+                Integer afState = result.get(CaptureResult.CONTROL_AF_STATE);
+                Integer aeState = result.get(CaptureResult.CONTROL_AE_STATE);
+                Log.d(TAG, "STATE_WAITING_TOUCH_FOCUS id: " + id + " afState:" + afState + " aeState:" + aeState);
                 break;
         }
     }
@@ -4066,8 +4069,17 @@ public class CaptureModule implements CameraModule, PhotoController,
                 mCaptureSession[id].capture(mPreviewRequestBuilder[id]
                         .build(), mCaptureCallback, mCameraHandler);
             } else {
-                mCaptureSession[id].setRepeatingRequest(mPreviewRequestBuilder[id]
-                        .build(), mCaptureCallback, mCameraHandler);
+                CameraCaptureSession session = mCaptureSession[id];
+                if (session instanceof CameraConstrainedHighSpeedCaptureSession) {
+                    List list = CameraUtil
+                            .createHighSpeedRequestList(mPreviewRequestBuilder[id].build(),id);
+                    ((CameraConstrainedHighSpeedCaptureSession) session).setRepeatingBurst(list
+                            , mCaptureCallback, mCameraHandler);
+                } else {
+                    mCaptureSession[id].setRepeatingRequest(mPreviewRequestBuilder[id]
+                            .build(), mCaptureCallback, mCameraHandler);
+                }
+
             }
         } catch (CameraAccessException | IllegalStateException e) {
             e.printStackTrace();
@@ -4400,6 +4412,7 @@ public class CaptureModule implements CameraModule, PhotoController,
                     updateVideoFlash();
                     return;
                 case SettingsManager.KEY_FLASH_MODE:
+                case SettingsManager.KEY_ZSL:
                 case SettingsManager.KEY_AUTO_HDR:
                 case SettingsManager.KEY_SAVERAW:
                 case SettingsManager.KEY_HDR:
