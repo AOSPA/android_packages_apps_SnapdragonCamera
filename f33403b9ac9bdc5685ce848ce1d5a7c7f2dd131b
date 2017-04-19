@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a80dd14_e768e289",
+        "filename": "src/com/android/camera/PhotoUI.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 728,
+      "author": {
+        "id": 1000012
+      },
+      "writtenOn": "2017-04-19T17:30:19Z",
+      "side": 1,
+      "message": "I removed the \u003e\u003e\u003e\u003e tag, but I think this method still doesn\u0027t belong here.  Couldn\u0027t find the original commit",
+      "revId": "f33403b9ac9bdc5685ce848ce1d5a7c7f2dd131b",
+      "serverId": "3162e3d8-d894-470e-abd9-724f7b0effad",
+      "unresolved": false
+    }
+  ]
+}
