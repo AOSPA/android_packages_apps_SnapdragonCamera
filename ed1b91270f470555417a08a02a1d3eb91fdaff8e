@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a80dd14_07d09652",
+        "filename": "src/com/android/camera/PhotoUI.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 761,
+      "author": {
+        "id": 1000002
+      },
+      "writtenOn": "2017-04-19T03:38:44Z",
+      "side": 1,
+      "message": "Remove this cruft",
+      "revId": "ed1b91270f470555417a08a02a1d3eb91fdaff8e",
+      "serverId": "3162e3d8-d894-470e-abd9-724f7b0effad",
+      "unresolved": false
+    }
+  ]
+}
