@@ -16,6 +16,24 @@
       "revId": "f33403b9ac9bdc5685ce848ce1d5a7c7f2dd131b",
       "serverId": "3162e3d8-d894-470e-abd9-724f7b0effad",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a80dd14_470feee1",
+        "filename": "src/com/android/camera/PhotoUI.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 728,
+      "author": {
+        "id": 1000002
+      },
+      "writtenOn": "2017-04-19T20:36:12Z",
+      "side": 1,
+      "message": "Yeah you\u0027re probably right. Don\u0027t think this method is used anywhere in this commit.",
+      "parentUuid": "9a80dd14_e768e289",
+      "revId": "f33403b9ac9bdc5685ce848ce1d5a7c7f2dd131b",
+      "serverId": "3162e3d8-d894-470e-abd9-724f7b0effad",
+      "unresolved": false
     }
   ]
 }
