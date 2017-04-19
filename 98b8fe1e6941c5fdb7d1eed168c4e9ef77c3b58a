@@ -16,6 +16,23 @@
       "revId": "98b8fe1e6941c5fdb7d1eed168c4e9ef77c3b58a",
       "serverId": "3162e3d8-d894-470e-abd9-724f7b0effad",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a80dd14_2763dab2",
+        "filename": "res/xml/camera_preferences.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 400,
+      "author": {
+        "id": 1000002
+      },
+      "writtenOn": "2017-04-19T03:50:04Z",
+      "side": 1,
+      "message": "This drawable is missing",
+      "revId": "98b8fe1e6941c5fdb7d1eed168c4e9ef77c3b58a",
+      "serverId": "3162e3d8-d894-470e-abd9-724f7b0effad",
+      "unresolved": false
     }
   ]
 }
