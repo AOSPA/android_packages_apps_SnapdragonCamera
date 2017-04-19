@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a80dd14_c7bd9e04",
+        "filename": "src/com/android/camera/CaptureModule.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 3004,
+      "author": {
+        "id": 1000002
+      },
+      "writtenOn": "2017-04-19T03:41:13Z",
+      "side": 1,
+      "message": "odd line break. Move the comma to 3004",
+      "revId": "d8e222de6464054229014068ef5c29ab494b8885",
+      "serverId": "3162e3d8-d894-470e-abd9-724f7b0effad",
+      "unresolved": false
+    }
+  ]
+}
