@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a80dd14_6746b225",
+        "filename": "src/com/android/camera/VideoMenu.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 768,
+      "author": {
+        "id": 1000002
+      },
+      "writtenOn": "2017-04-19T03:48:18Z",
+      "side": 1,
+      "message": "This method would benefit from some spacing to organize it.",
+      "revId": "54fdaeef65559520e85c0bc0c009575b7c0112a0",
+      "serverId": "3162e3d8-d894-470e-abd9-724f7b0effad",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a80dd14_a747ca1c",
+        "filename": "src/com/android/camera/VideoMenu.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 778,
+      "author": {
+        "id": 1000002
+      },
+      "writtenOn": "2017-04-19T03:48:18Z",
+      "side": 1,
+      "message": "778 and 777 can be made a oneliner",
+      "revId": "54fdaeef65559520e85c0bc0c009575b7c0112a0",
+      "serverId": "3162e3d8-d894-470e-abd9-724f7b0effad",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a80dd14_874ac625",
+        "filename": "src/com/android/camera/VideoMenu.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 781,
+      "author": {
+        "id": 1000002
+      },
+      "writtenOn": "2017-04-19T03:48:18Z",
+      "side": 1,
+      "message": "move this list pref up with the others",
+      "revId": "54fdaeef65559520e85c0bc0c009575b7c0112a0",
+      "serverId": "3162e3d8-d894-470e-abd9-724f7b0effad",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a80dd14_4741ae0a",
+        "filename": "src/com/android/camera/VideoMenu.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 785,
+      "author": {
+        "id": 1000002
+      },
+      "writtenOn": "2017-04-19T03:48:18Z",
+      "side": 1,
+      "message": "I would prefer this logic to  be the other way around, so test if the substring equals \"hfr\" or \"hfs\"",
+      "revId": "54fdaeef65559520e85c0bc0c009575b7c0112a0",
+      "serverId": "3162e3d8-d894-470e-abd9-724f7b0effad",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a80dd14_0737b6b1",
+        "filename": "src/com/android/camera/VideoMenu.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 787,
+      "author": {
+        "id": 1000002
+      },
+      "writtenOn": "2017-04-19T03:48:18Z",
+      "side": 1,
+      "message": "remove extra spaces in if condition",
+      "revId": "54fdaeef65559520e85c0bc0c009575b7c0112a0",
+      "serverId": "3162e3d8-d894-470e-abd9-724f7b0effad",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a80dd14_273cba93",
+        "filename": "src/com/android/camera/VideoMenu.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 788,
+      "author": {
+        "id": 1000002
+      },
+      "writtenOn": "2017-04-19T03:48:18Z",
+      "side": 1,
+      "message": "this can be a oneliner",
+      "revId": "54fdaeef65559520e85c0bc0c009575b7c0112a0",
+      "serverId": "3162e3d8-d894-470e-abd9-724f7b0effad",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a80dd14_e751c2d9",
+        "filename": "src/com/android/camera/VideoModule.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2339,
+      "author": {
+        "id": 1000002
+      },
+      "writtenOn": "2017-04-19T03:48:18Z",
+      "side": 1,
+      "message": "reverse these. maybe not applicable in this commit.",
+      "revId": "54fdaeef65559520e85c0bc0c009575b7c0112a0",
+      "serverId": "3162e3d8-d894-470e-abd9-724f7b0effad",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a80dd14_c754becc",
+        "filename": "src/com/android/camera/VideoModule.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2554,
+      "author": {
+        "id": 1000002
+      },
+      "writtenOn": "2017-04-19T03:48:18Z",
+      "side": 1,
+      "message": "reverse this string compare as describe previously",
+      "revId": "54fdaeef65559520e85c0bc0c009575b7c0112a0",
+      "serverId": "3162e3d8-d894-470e-abd9-724f7b0effad",
+      "unresolved": false
+    }
+  ]
+}
