@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a80dd14_67cf92b1",
+        "filename": "src/com/android/camera/VideoModule.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2562,
+      "author": {
+        "id": 1000002
+      },
+      "writtenOn": "2017-04-19T03:40:35Z",
+      "side": 1,
+      "message": "remove the extra spaces in the if condition",
+      "revId": "082ab24bc76f8c54f350eb8cd5091fd82e4f31a0",
+      "serverId": "3162e3d8-d894-470e-abd9-724f7b0effad",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a80dd14_87c3a689",
+        "filename": "src/com/android/camera/VideoModule.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2619,
+      "author": {
+        "id": 1000002
+      },
+      "writtenOn": "2017-04-19T03:40:35Z",
+      "side": 1,
+      "message": "No need to explicitly declare a string that\u0027s used once",
+      "revId": "082ab24bc76f8c54f350eb8cd5091fd82e4f31a0",
+      "serverId": "3162e3d8-d894-470e-abd9-724f7b0effad",
+      "unresolved": false
+    }
+  ]
+}
