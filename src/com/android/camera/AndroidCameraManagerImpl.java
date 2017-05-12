@@ -444,7 +444,6 @@ class AndroidCameraManagerImpl implements CameraManager {
                     }
                     return;
                 }
-                throw e;
             }
         }
     }
