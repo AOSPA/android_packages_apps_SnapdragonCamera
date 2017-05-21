@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1189fbf5_aa2773f4",
+        "filename": "src/com/android/camera/AndroidCameraManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 242,
+      "author": {
+        "id": 1000007
+      },
+      "writtenOn": "2017-05-21T20:14:38Z",
+      "side": 1,
+      "message": "Is the exact same as this",
+      "revId": "df4c31d04d6d42badd0a710ecb37fc669124bd2b",
+      "serverId": "3162e3d8-d894-470e-abd9-724f7b0effad",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a03d782f_629d3aab",
+        "filename": "src/com/android/camera/AndroidCameraManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 244,
+      "author": {
+        "id": 1000007
+      },
+      "writtenOn": "2017-05-21T20:14:38Z",
+      "side": 1,
+      "message": "This",
+      "revId": "df4c31d04d6d42badd0a710ecb37fc669124bd2b",
+      "serverId": "3162e3d8-d894-470e-abd9-724f7b0effad",
+      "unresolved": false
+    }
+  ]
+}
