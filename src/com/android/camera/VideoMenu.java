@@ -771,7 +771,12 @@ public class VideoMenu extends MenuController
                 .findPreference(CameraSettings.KEY_VIDEO_TIME_LAPSE_FRAME_INTERVAL);
         ListPreference videoHDRPref = mPreferenceGroup
                 .findPreference(CameraSettings.KEY_VIDEO_HDR);
-        String disMode = disPref.getValue();
+        String disMode;
+        if (disPref != null && disPref.getValue() != null) {
+                disMode = disPref.getValue();
+        } else {
+                disMode = "";
+        }
         String videoHDR = videoHDRPref == null ? "off" : videoHDRPref.getValue();
         String frameIntervalStr = frameIntervalPref.getValue();
         int timeLapseInterval = Integer.parseInt(frameIntervalStr);
