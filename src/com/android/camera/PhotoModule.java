@@ -1447,12 +1447,20 @@ public class PhotoModule
                 mApplicationContext.getResources().getBoolean(R.bool.back_camera_restart_preview_onPictureTaken);
             boolean frontCameraRestartPreviewOnPictureTaken =
                 mApplicationContext.getResources().getBoolean(R.bool.front_camera_restart_preview_onPictureTaken);
+            boolean manualIsoRestartPreviewOnPictureTaken =
+                mApplicationContext.getResources().getBoolean(R.bool.manual_iso_restart_preview_onPictureTaken);
 
             CameraInfo info = CameraHolder.instance().getCameraInfo()[mCameraId];
+            final String isoMode = CameraSettings.getISOValue(mParameters);
+            final String isoManual = CameraSettings.KEY_MANUAL_ISO;
             if ((info.facing == CameraInfo.CAMERA_FACING_BACK && backCameraRestartPreviewOnPictureTaken)
-                    || (info.facing == CameraInfo.CAMERA_FACING_FRONT && frontCameraRestartPreviewOnPictureTaken)) {
+                    || (info.facing == CameraInfo.CAMERA_FACING_FRONT && frontCameraRestartPreviewOnPictureTaken)
+                    || isoMode.equals(isoManual) && manualIsoRestartPreviewOnPictureTaken) {
                 needRestartPreview = true;
+                Log.i(TAG, "PREVIEW RESTART!");
             }
+
+
 
             if (needRestartPreview) {
                 mHandler.post(() -> {
