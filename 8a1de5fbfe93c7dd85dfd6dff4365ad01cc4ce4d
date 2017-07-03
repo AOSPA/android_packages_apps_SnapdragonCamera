@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4f3d60d6_fba7abdc",
+        "filename": "res/values/pa_config.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000011
+      },
+      "writtenOn": "2017-07-03T20:02:38Z",
+      "side": 1,
+      "message": "Make opt-in",
+      "range": {
+        "startLine": 20,
+        "startChar": 59,
+        "endLine": 20,
+        "endChar": 63
+      },
+      "revId": "8a1de5fbfe93c7dd85dfd6dff4365ad01cc4ce4d",
+      "serverId": "3162e3d8-d894-470e-abd9-724f7b0effad",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "587b59fb_89f80888",
+        "filename": "src/com/android/camera/PhotoModule.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1460,
+      "author": {
+        "id": 1000011
+      },
+      "writtenOn": "2017-07-03T20:02:38Z",
+      "side": 1,
+      "message": "remove log",
+      "range": {
+        "startLine": 1460,
+        "startChar": 0,
+        "endLine": 1460,
+        "endChar": 47
+      },
+      "revId": "8a1de5fbfe93c7dd85dfd6dff4365ad01cc4ce4d",
+      "serverId": "3162e3d8-d894-470e-abd9-724f7b0effad",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d4332957_d7aaa8ba",
+        "filename": "src/com/android/camera/PhotoModule.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1463,
+      "author": {
+        "id": 1000011
+      },
+      "writtenOn": "2017-07-03T20:02:38Z",
+      "side": 1,
+      "message": "whitespace",
+      "range": {
+        "startLine": 1462,
+        "startChar": 0,
+        "endLine": 1463,
+        "endChar": 0
+      },
+      "revId": "8a1de5fbfe93c7dd85dfd6dff4365ad01cc4ce4d",
+      "serverId": "3162e3d8-d894-470e-abd9-724f7b0effad",
+      "unresolved": false
+    }
+  ]
+}
