@@ -1390,8 +1390,14 @@ public class SettingsManager implements ListMenu.SettingsListener {
     }
 
     public List<String> getSupportedInstantAecAvailableModes(int cameraId) {
-        int[] instantAecAvailableModes = mCharacteristics.get(cameraId).get(
-                                           CaptureModule.InstantAecAvailableModes);
+        int[] instantAecAvailableModes;
+        try {
+            instantAecAvailableModes = mCharacteristics.get(cameraId).get(
+                                               CaptureModule.InstantAecAvailableModes);
+        } catch (IllegalArgumentException ignored) {
+            return null;
+        }
+
         if (instantAecAvailableModes == null) {
             return null;
         }
