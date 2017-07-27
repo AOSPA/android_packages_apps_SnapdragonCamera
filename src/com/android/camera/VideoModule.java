@@ -64,14 +64,14 @@ import com.android.camera.CameraManager.CameraPictureCallback;
 import com.android.camera.CameraManager.CameraProxy;
 import com.android.camera.app.OrientationManager;
 import com.android.camera.exif.ExifInterface;
-import com.android.camera.ui.RotateImageView;
 import com.android.camera.ui.RotateTextToast;
+import com.android.camera.ui.ShutterButton;
 import com.android.camera.util.AccessibilityUtils;
 import com.android.camera.util.ApiHelper;
 import com.android.camera.util.CameraUtil;
 import com.android.camera.util.UsageStatistics;
 import org.codeaurora.snapcam.R;
-import com.android.camera.PhotoModule;
+
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -409,10 +409,7 @@ public class VideoModule implements CameraModule,
                 }
 
                 case SWITCH_CAMERA_START_ANIMATION: {
-                    //TODO:
-                    //((CameraScreenNail) mActivity.mCameraScreenNail).animateSwitchCamera();
-
-                    // Enable all camera controls.
+                    mUI.animateCameraSwitch();
                     mSwitchingCamera = false;
                     break;
                 }
@@ -464,12 +461,6 @@ public class VideoModule implements CameraModule,
         }
     }
 
-    private void initializeSurfaceView() {
-        if (!ApiHelper.HAS_SURFACE_TEXTURE_RECORDING) {  // API level < 16
-            mUI.initializeSurfaceView();
-        }
-    }
-
     public void reinit() {
         mPreferences = ComboPreferences.get(mActivity);
         if (mPreferences == null) {
@@ -490,8 +481,6 @@ public class VideoModule implements CameraModule,
         if (mPreferences == null) {
             mPreferences = new ComboPreferences(mActivity);
         }
-
-        mUI.getCameraControls().setCameraActivity(mActivity);
 
         CameraSettings.upgradeGlobalPreferences(mPreferences.getGlobal(), activity);
         mCameraId = getPreferredCameraId(mPreferences);
@@ -516,7 +505,6 @@ public class VideoModule implements CameraModule,
         // Surface texture is from camera screen nail and startPreview needs it.
         // This must be done before startPreview.
         mIsVideoCaptureIntent = isVideoCaptureIntent();
-        initializeSurfaceView();
 
         // Make sure camera device is opened.
         try {
@@ -625,39 +613,27 @@ public class VideoModule implements CameraModule,
 
         Log.e(TAG,"loadCameraPreferences() updating camera_id pref");
 
-        IconListPreference switchIconPref =
-                (IconListPreference)mPreferenceGroup.findPreference(
-                CameraSettings.KEY_CAMERA_ID);
+        ListPreference switchIconPref = mPreferenceGroup.findPreference(CameraSettings.KEY_CAMERA_ID);
 
         //if numOfCams < 2 then switchIconPref will be null as there is no switch icon in this case
-        if (switchIconPref == null)
-            return;
+        if (switchIconPref == null) return;
 
-        int[] iconIds = new int[numOfCams];
         String[] entries = new String[numOfCams];
         String[] labels = new String[numOfCams];
-        int[] largeIconIds = new int[numOfCams];
 
-        for(int i=0;i<numOfCams;i++) {
+        for(int i = 0;i < numOfCams; i++) {
             CameraInfo info = CameraHolder.instance().getCameraInfo()[i];
-            if(info.facing == CameraInfo.CAMERA_FACING_BACK) {
-                iconIds[i] = R.drawable.ic_switch_back;
+            if (info.facing == CameraInfo.CAMERA_FACING_BACK) {
                 entries[i] = mActivity.getResources().getString(R.string.pref_camera_id_entry_back);
                 labels[i] = mActivity.getResources().getString(R.string.pref_camera_id_label_back);
-                largeIconIds[i] = R.drawable.ic_switch_back;
             } else {
-                iconIds[i] = R.drawable.ic_switch_front;
                 entries[i] = mActivity.getResources().getString(R.string.pref_camera_id_entry_front);
                 labels[i] = mActivity.getResources().getString(R.string.pref_camera_id_label_front);
-                largeIconIds[i] = R.drawable.ic_switch_front;
             }
         }
 
-        switchIconPref.setIconIds(iconIds);
         switchIconPref.setEntries(entries);
         switchIconPref.setLabels(labels);
-        switchIconPref.setLargeIconIds(largeIconIds);
-
     }
 
     private void initializeVideoControl() {
@@ -1162,7 +1138,7 @@ public class VideoModule implements CameraModule,
         }
 
         initializeVideoControl();
-        mUI.applySurfaceChange(VideoUI.SURFACE_STATUS.SURFACE_VIEW);
+        mUI.applySurfaceChange(CameraUI.SURFACE_STATUS.SURFACE_VIEW);
 
         mUI.initDisplayChangeListener();
         // Initializing it here after the preview is started.
@@ -1354,7 +1330,7 @@ public class VideoModule implements CameraModule,
         if(mWasMute != mIsMute) {
             setMute(mWasMute, false);
         }
-        mUI.applySurfaceChange(VideoUI.SURFACE_STATUS.HIDE);
+        mUI.applySurfaceChange(CameraUI.SURFACE_STATUS.HIDE);
 
         mActivity.showGrid(mPreferences);
     }
@@ -1376,11 +1352,8 @@ public class VideoModule implements CameraModule,
         if (mMediaRecorderRecording) {
             onStopVideoRecording();
             return true;
-        } else if (mUI.hideSwitcherPopup()) {
-            return true;
-        } else {
-            return mUI.onBackPressed();
         }
+        return mUI.onBackPressed();
     }
 
     @Override
@@ -1859,6 +1832,8 @@ public class VideoModule implements CameraModule,
         mStartRecPending = true;
         mUI.cancelAnimations();
         mUI.setSwipingEnabled(false);
+        mUI.getCameraControls().disableCameraControlsSettingsSwitch();
+        mUI.getCameraControls().showCameraControlsSettings(true);
         mUI.hideUIwhileRecording();
         // When recording request is sent before starting preview, onPreviewFrame()
         // callback doesn't happen so removing preview cover here, instead.
@@ -2907,16 +2882,14 @@ public class VideoModule implements CameraModule,
 
     protected void setCameraId(int cameraId) {
         ListPreference pref = mPreferenceGroup.findPreference(CameraSettings.KEY_CAMERA_ID);
-        pref.setValue("" + cameraId);
+        pref.setValue(String.valueOf(cameraId));
     }
 
     private void switchCamera() {
-        if (mPaused)  {
-            return;
-        }
+        if (mPaused) return;
 
         Log.d(TAG, "Start to switch camera.");
-        mUI.applySurfaceChange(VideoUI.SURFACE_STATUS.HIDE);
+        mUI.applySurfaceChange(CameraUI.SURFACE_STATUS.HIDE);
         mCameraId = mPendingSwitchCameraId;
         mPendingSwitchCameraId = -1;
         setCameraId(mCameraId);
@@ -2928,7 +2901,7 @@ public class VideoModule implements CameraModule,
         CameraSettings.upgradeLocalPreferences(mPreferences.getLocal());
         openCamera();
         readVideoPreferences();
-        mUI.applySurfaceChange(VideoUI.SURFACE_STATUS.SURFACE_VIEW);
+        mUI.applySurfaceChange(CameraUI.SURFACE_STATUS.SURFACE_VIEW);
         startPreview();
         initializeVideoSnapshot();
         resizeForPreviewAspectRatio();
@@ -2942,6 +2915,7 @@ public class VideoModule implements CameraModule,
         // Start switch camera animation. Post a message because
         // onFrameAvailable from the old camera may already exist.
         mHandler.sendEmptyMessage(SWITCH_CAMERA_START_ANIMATION);
+
         mUI.updateOnScreenIndicators(mParameters, mPreferences);
 
         //Display timelapse msg depending upon selection in front/back camera.
@@ -3107,18 +3081,8 @@ public class VideoModule implements CameraModule,
 
         mPendingSwitchCameraId = cameraId;
         Log.d(TAG, "Start to copy texture.");
-        // We need to keep a preview frame for the animation before
-        // releasing the camera. This will trigger onPreviewTextureCopied.
-        // TODO: ((CameraScreenNail) mActivity.mCameraScreenNail).copyTexture();
-        // Disable all camera controls.
         mSwitchingCamera = true;
         switchCamera();
-
-    }
-
-    @Override
-    public void onShowSwitcherPopup() {
-        mUI.onShowSwitcherPopup();
     }
 
     @Override
