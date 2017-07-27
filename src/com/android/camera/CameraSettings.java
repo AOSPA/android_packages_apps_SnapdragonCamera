@@ -273,8 +273,6 @@ public class CameraSettings {
 
     public static final String KEY_REFOCUS_PROMPT = "refocus-prompt";
 
-    public static final String KEY_SHOW_MENU_HELP = "help_menu";
-
     public static final String KEY_REQUEST_PERMISSION  = "request_permission";
 
     public static final String KEY_SELFIE_FLASH = "pref_selfie_flash_key";
@@ -823,7 +821,7 @@ public class CameraSettings {
             if (!isBokehMPOSupported(mParameters)) {
                 removePreference(group, bokehMpo.getKey());
             }
-	}
+        }
 
         // Remove leading ISO from iso-values
         boolean isoValuesUseNumbers = mContext.getResources().getBoolean(R.bool.iso_values_use_numbers);
@@ -1164,7 +1162,6 @@ public class CameraSettings {
             labels[i - minValue] = explabel + " " + builder.toString();
             icons[i - minValue] = iconIds.getResourceId(3 + i, 0);
         }
-        exposure.setUseSingleIcon(true);
         exposure.setEntries(entries);
         exposure.setLabels(labels);
         exposure.setEntryValues(entryValues);

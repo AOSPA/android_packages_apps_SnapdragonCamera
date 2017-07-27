@@ -467,16 +467,12 @@ public class VideoMenu extends MenuController
     public void initSwitchItem(final String prefKey, View switcher) {
         final IconListPreference pref =
                 (IconListPreference) mPreferenceGroup.findPreference(prefKey);
-        if (pref == null)
-            return;
+        if (pref == null) return;
 
         int[] iconIds = pref.getLargeIconIds();
         int resid = -1;
         int index = pref.findIndexOfValue(pref.getValue());
         if (!pref.getUseSingleIcon() && iconIds != null) {
-            if (index == -1) {
-                return;
-            }
             // Each entry has a corresponding icon.
             resid = iconIds[index];
         } else {
@@ -489,18 +485,16 @@ public class VideoMenu extends MenuController
         switcher.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                IconListPreference pref = (IconListPreference) mPreferenceGroup
-                        .findPreference(prefKey);
-                if (pref == null)
-                    return;
                 int index = pref.findIndexOfValue(pref.getValue());
                 CharSequence[] values = pref.getEntryValues();
                 index = (index + 1) % values.length;
                 pref.setValueIndex(index);
-                ((ImageView) v).setImageResource(
-                        ((IconListPreference) pref).getLargeIconIds()[index]);
-                if (prefKey.equals(CameraSettings.KEY_CAMERA_ID))
+                if (!pref.getUseSingleIcon()) {
+                    ((ImageView) v).setImageResource(pref.getLargeIconIds()[index]);
+                }
+                if (prefKey.equals(CameraSettings.KEY_CAMERA_ID)) {
                     mListener.onCameraPickerClicked(index);
+                }
                 reloadPreference(pref);
                 onSettingChanged(pref);
             }
@@ -658,7 +652,7 @@ public class VideoMenu extends MenuController
     }
 
     public void openFirstLevel() {
-        if (isMenuBeingShown() || CameraControls.isAnimating())
+        if (isMenuBeingShown())
             return;
         if (mListMenu == null || mPopupStatus != POPUP_FIRST_LEVEL) {
             initializePopup();
