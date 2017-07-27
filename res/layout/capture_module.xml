@@ -41,7 +41,7 @@
         <com.android.camera.ui.AutoFitSurfaceView
             android:layout_width="300dp"
             android:layout_height="300dp"
-	    android:id="@+id/mdp_preview_content_mono"
+            android:id="@+id/mdp_preview_content_mono"
             android:visibility="gone"/>
     </FrameLayout>
 
@@ -95,7 +95,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -120,11 +119,6 @@
     <include
         style="@style/CameraControls"
         layout="@layout/one_ui_layout"
-        android:layout_gravity="center" />
-
-    <include
-        style="@style/CameraControls"
-        layout="@layout/menu_help"
         android:layout_gravity="center" />
 
     <FrameLayout

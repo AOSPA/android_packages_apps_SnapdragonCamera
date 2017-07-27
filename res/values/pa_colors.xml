@@ -20,4 +20,7 @@
     <color name="grid_line">#33FFFFFF</color>
 
     <color name="background_color">#00000000</color>
+
+    <color name="module_switcher_index">@android:color/holo_green_light</color>
+    <color name="module_switcher_item">@android:color/white</color>
 </resources>
