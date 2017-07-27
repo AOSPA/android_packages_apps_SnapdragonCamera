@@ -409,10 +409,7 @@ public class VideoModule implements CameraModule,
                 }
 
                 case SWITCH_CAMERA_START_ANIMATION: {
-                    //TODO:
-                    //((CameraScreenNail) mActivity.mCameraScreenNail).animateSwitchCamera();
-
-                    // Enable all camera controls.
+                    mUI.animateSurfaceViewFlip();
                     mSwitchingCamera = false;
                     break;
                 }
@@ -464,12 +461,6 @@ public class VideoModule implements CameraModule,
         }
     }
 
-    private void initializeSurfaceView() {
-        if (!ApiHelper.HAS_SURFACE_TEXTURE_RECORDING) {  // API level < 16
-            mUI.initializeSurfaceView();
-        }
-    }
-
     public void reinit() {
         mPreferences = ComboPreferences.get(mActivity);
         if (mPreferences == null) {
@@ -490,8 +481,6 @@ public class VideoModule implements CameraModule,
         if (mPreferences == null) {
             mPreferences = new ComboPreferences(mActivity);
         }
-
-        mUI.getCameraControls().setCameraActivity(mActivity);
 
         CameraSettings.upgradeGlobalPreferences(mPreferences.getGlobal(), activity);
         mCameraId = getPreferredCameraId(mPreferences);
@@ -516,7 +505,6 @@ public class VideoModule implements CameraModule,
         // Surface texture is from camera screen nail and startPreview needs it.
         // This must be done before startPreview.
         mIsVideoCaptureIntent = isVideoCaptureIntent();
-        initializeSurfaceView();
 
         // Make sure camera device is opened.
         try {
@@ -1162,7 +1150,7 @@ public class VideoModule implements CameraModule,
         }
 
         initializeVideoControl();
-        mUI.applySurfaceChange(VideoUI.SURFACE_STATUS.SURFACE_VIEW);
+        mUI.applySurfaceChange(CameraUI.SURFACE_STATUS.SURFACE_VIEW);
 
         mUI.initDisplayChangeListener();
         // Initializing it here after the preview is started.
@@ -1354,7 +1342,7 @@ public class VideoModule implements CameraModule,
         if(mWasMute != mIsMute) {
             setMute(mWasMute, false);
         }
-        mUI.applySurfaceChange(VideoUI.SURFACE_STATUS.HIDE);
+        mUI.applySurfaceChange(CameraUI.SURFACE_STATUS.HIDE);
 
         mActivity.showGrid(mPreferences);
     }
@@ -1376,11 +1364,8 @@ public class VideoModule implements CameraModule,
         if (mMediaRecorderRecording) {
             onStopVideoRecording();
             return true;
-        } else if (mUI.hideSwitcherPopup()) {
-            return true;
-        } else {
-            return mUI.onBackPressed();
         }
+        return mUI.onBackPressed();
     }
 
     @Override
@@ -2916,7 +2901,7 @@ public class VideoModule implements CameraModule,
         }
 
         Log.d(TAG, "Start to switch camera.");
-        mUI.applySurfaceChange(VideoUI.SURFACE_STATUS.HIDE);
+        mUI.applySurfaceChange(CameraUI.SURFACE_STATUS.HIDE);
         mCameraId = mPendingSwitchCameraId;
         mPendingSwitchCameraId = -1;
         setCameraId(mCameraId);
@@ -2928,7 +2913,7 @@ public class VideoModule implements CameraModule,
         CameraSettings.upgradeLocalPreferences(mPreferences.getLocal());
         openCamera();
         readVideoPreferences();
-        mUI.applySurfaceChange(VideoUI.SURFACE_STATUS.SURFACE_VIEW);
+        mUI.applySurfaceChange(CameraUI.SURFACE_STATUS.SURFACE_VIEW);
         startPreview();
         initializeVideoSnapshot();
         resizeForPreviewAspectRatio();
@@ -3114,11 +3099,6 @@ public class VideoModule implements CameraModule,
         mSwitchingCamera = true;
         switchCamera();
 
-    }
-
-    @Override
-    public void onShowSwitcherPopup() {
-        mUI.onShowSwitcherPopup();
     }
 
     @Override
