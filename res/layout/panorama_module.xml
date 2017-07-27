@@ -18,7 +18,9 @@
     android:clickable="true"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+
     <include layout="@layout/pano_module_capture" />
+
     <View
         android:id="@+id/preview_cover"
         android:layout_width="match_parent"
@@ -128,7 +130,7 @@
         </LinearLayout>
     </com.android.camera.ui.RotateLayout>
 
-    <include layout="@layout/camera_controls"
-             android:layout_gravity="center"
-             style="@style/CameraControls"/>
+    <include
+        layout="@layout/camera_controls"
+        android:layout_gravity="center" />
 </merge>
