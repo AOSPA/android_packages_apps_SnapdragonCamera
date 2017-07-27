@@ -108,6 +108,7 @@ import com.android.camera.ui.ModuleSwitcher;
 import com.android.camera.ui.DetailsDialog;
 import com.android.camera.ui.FilmStripView;
 import com.android.camera.ui.FilmStripView.ImageData;
+import com.android.camera.ui.GridView;
 import com.android.camera.ui.PanoCaptureProcessView;
 import com.android.camera.ui.RotateTextToast;
 import com.android.camera.util.ApiHelper;
@@ -211,7 +212,6 @@ public class CameraActivity extends Activity
     private CaptureModule mCaptureModule;
     private PanoCaptureModule mPano2Module;
     private FrameLayout mAboveFilmstripControlLayout;
-    private FrameLayout mCameraRootFrame;
     private View mCameraPhotoModuleRootView;
     private View mCameraVideoModuleRootView;
     private View mCameraPanoModuleRootView;
@@ -1519,7 +1519,6 @@ public class CameraActivity extends Activity
 
         LayoutInflater inflater = getLayoutInflater();
         View rootLayout = inflater.inflate(R.layout.camera, null, false);
-        mCameraRootFrame = (FrameLayout)rootLayout.findViewById(R.id.camera_root_frame);
         mCameraPhotoModuleRootView = rootLayout.findViewById(R.id.camera_photo_root);
         mCameraVideoModuleRootView = rootLayout.findViewById(R.id.camera_video_root);
         mCameraPanoModuleRootView = rootLayout.findViewById(R.id.camera_pano_root);
@@ -2198,14 +2197,7 @@ public class CameraActivity extends Activity
             case ModuleSwitcher.GCAM_MODULE_INDEX:  //Unused module for now
             default:
                 // Fall back to photo mode.
-                if(mPhotoModule == null) {
-                    mPhotoModule = new PhotoModule();
-                    mPhotoModule.init(this, mCameraPhotoModuleRootView);
-                } else {
-                    mPhotoModule.reinit();
-                }
-                mCurrentModule = mPhotoModule;
-                mCameraPhotoModuleRootView.setVisibility(View.VISIBLE);
+                setModuleFromIndex(ModuleSwitcher.PHOTO_MODULE_INDEX);
                 break;
         }
     }
@@ -2341,11 +2333,6 @@ public class CameraActivity extends Activity
                 mUndoDeletionBar.setVisibility(View.GONE);
             }
         }
-    }
-
-    @Override
-    public void onShowSwitcherPopup() {
-        mCurrentModule.onShowSwitcherPopup();
     }
 
     /**
