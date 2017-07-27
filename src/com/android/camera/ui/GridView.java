@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Paranoid Android Project
+ * Copyright (C) 2017 Paranoid Android
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.camera;
+package com.android.camera.ui;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -60,7 +60,7 @@ public class GridView extends View {
         }
     }
 
-    protected void setBounds(RectF rectF) {
+    public void setBounds(RectF rectF) {
         mDrawBounds = rectF;
         invalidate();
     }
