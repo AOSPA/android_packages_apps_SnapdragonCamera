@@ -39,7 +39,6 @@
         layout="@layout/scene_mode_label"/>
 
     <include
-        style="@style/CameraControls"
         layout="@layout/camera_controls"
         android:layout_gravity="center" />
 </merge>

@@ -132,7 +132,7 @@ public class PhotoMenu extends MenuController
         mSceneModeSwitcher = ui.getRootView().findViewById(R.id.scene_mode_switcher);
         mFilterModeSwitcher = ui.getRootView().findViewById(R.id.filter_mode_switcher);
         mMakeupListener = makeupListener;
-        mSettingMenu = ui.getRootView().findViewById(R.id.menu);
+        mSettingMenu = ui.getRootView().findViewById(R.id.settings);
         mCameraSwitcher = ui.getRootView().findViewById(R.id.camera_switcher);
         mPreviewThumbnail = ui.getRootView().findViewById(R.id.preview_thumb);
     }
@@ -553,13 +553,6 @@ public class PhotoMenu extends MenuController
 
     private void buttonSetEnabled(View v, boolean enable) {
         v.setEnabled(enable);
-        if (v instanceof ViewGroup) {
-            View v2 = ((ViewGroup) v).getChildAt(0);
-            if (v2 != null)
-                v2.setEnabled(enable);
-
-        }
-
     }
 
     public boolean isOverMenu(MotionEvent ev) {
@@ -776,7 +769,6 @@ public class PhotoMenu extends MenuController
 
         if ((autohdr != null) && autohdr.equals("enable")) {
             mHdrSwitcher.setVisibility(View.GONE);
-            mUI.getCameraControls().removeFromViewList(mHdrSwitcher);
         } else {
             mHdrSwitcher.setVisibility(View.VISIBLE);
         }
@@ -824,24 +816,17 @@ public class PhotoMenu extends MenuController
         switcher.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                IconListPreference pref = (IconListPreference) mPreferenceGroup
-                        .findPreference(prefKey);
-                if (pref == null)
-                    return;
-                if (prefKey.equals(CameraSettings.KEY_CAMERA_ID)) {
-                    // Hide the camera control while switching the camera.
-                    // The camera control will be added back when
-                    // onCameraPickerClicked is completed
-                    mUI.hideUI();
-                }
+                if (pref == null) return;
                 int index = pref.findIndexOfValue(pref.getValue());
                 CharSequence[] values = pref.getEntryValues();
                 index = (index + 1) % values.length;
                 pref.setValueIndex(index);
-                ((ImageView) v).setImageResource(
-                        ((IconListPreference) pref).getLargeIconIds()[index]);
-                if (prefKey.equals(CameraSettings.KEY_CAMERA_ID))
+                if (!pref.getUseSingleIcon()) {
+                    ((ImageView) v).setImageResource(pref.getLargeIconIds()[index]);
+                }
+                if (prefKey.equals(CameraSettings.KEY_CAMERA_ID)) {
                     mListener.onCameraPickerClicked(index);
+                }
                 reloadPreference(pref);
                 onSettingChanged(pref);
             }
@@ -849,14 +834,13 @@ public class PhotoMenu extends MenuController
     }
 
     public void initMakeupModeButton(View button) {
-        if(!TsMakeupManager.HAS_TS_MAKEUP) {
+        if (!TsMakeupManager.HAS_TS_MAKEUP) {
             return;
         }
         button.setVisibility(View.INVISIBLE);
         final IconListPreference pref = (IconListPreference) mPreferenceGroup
                 .findPreference(CameraSettings.KEY_TS_MAKEUP_UILABLE);
-        if (pref == null)
-            return;
+        if (pref == null) return;
 
         int[] iconIds = pref.getLargeIconIds();
         int resid = -1;
@@ -943,12 +927,11 @@ public class PhotoMenu extends MenuController
         }
     }
 
-    public void initSceneModeButton(View button) {
+    private void initSceneModeButton(View button) {
         button.setVisibility(View.INVISIBLE);
         final IconListPreference pref = (IconListPreference) mPreferenceGroup
                 .findPreference(CameraSettings.KEY_SCENE_MODE);
-        if (pref == null)
-            return;
+        if (pref == null) return;
         updateSceneModeIcon(pref);
         button.setVisibility(View.VISIBLE);
         button.setOnClickListener(new OnClickListener() {
@@ -1246,7 +1229,7 @@ public class PhotoMenu extends MenuController
     }
 
     public void openFirstLevel() {
-        if (isMenuBeingShown() || CameraControls.isAnimating()) {
+        if (isMenuBeingShown()) {
             return;
         }
         if(TsMakeupManager.HAS_TS_MAKEUP) {
@@ -1489,7 +1472,6 @@ public class PhotoMenu extends MenuController
         ListPreference autoHdrPref = mPreferenceGroup.findPreference(CameraSettings.KEY_AUTO_HDR);
         if (autoHdrPref != null && autoHdrPref.getValue().equalsIgnoreCase("enable")) {
             mHdrSwitcher.setVisibility(View.GONE);
-            mUI.getCameraControls().removeFromViewList(mHdrSwitcher);
         } else {
             mHdrSwitcher.setVisibility(View.VISIBLE);
         }

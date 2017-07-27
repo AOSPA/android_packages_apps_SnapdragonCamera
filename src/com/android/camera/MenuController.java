@@ -89,8 +89,11 @@ public class MenuController {
 
     protected void reloadPreference(IconListPreference pref) {
         View switcher = mPreferenceMap.get(pref);
-        if (switcher == null)
+        if (switcher == null) return;
+        if (pref.getUseSingleIcon()) {
+            ((ImageView) switcher).setImageResource(pref.getSingleIcon());
             return;
+        }
         String overrideValue = mOverrides.get(pref);
         int index;
         if (overrideValue == null) {
@@ -105,7 +108,6 @@ public class MenuController {
             }
         }
         ((ImageView) switcher).setImageResource(pref.getLargeIconIds()[index]);
-
     }
 
     // Scene mode may override other camera settings (ex: flash mode).
