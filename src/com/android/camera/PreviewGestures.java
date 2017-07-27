@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2013 The Android Open Source Project
+ * Copyright (C) 2017 Paranoid Android
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +44,9 @@ public class PreviewGestures
     public static final int DIR_LEFT = 2;
     public static final int DIR_RIGHT = 3;
 
+    private final float mSwipeThreshold;
     private SingleTapListener mTapListener;
+    private SwipeListener mSwipeListener;
     private RenderOverlay mOverlay;
     private PieRenderer mPie;
     private TrackingFocusRenderer mTrackingFocus;
@@ -82,7 +85,7 @@ public class PreviewGestures
         }
 
         @Override
-        public boolean onScroll (MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+        public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
             if (e1 == null) {
                 // e1 can be null if for some cases.
                 return false;
@@ -98,25 +101,38 @@ public class PreviewGestures
 
             if (isLeftSwipe(orientation, deltaX, deltaY)) {
                 waitUntilNextDown = true;
-                if (mCaptureUI != null)
+                if (mCaptureUI != null) {
                     mCaptureUI.openSettingsMenu();
+                }
+                if (mSwipeListener != null) {
+                    mSwipeListener.onSwipeLeft(null);
+                }
                 return true;
-            } else {
-                return onSingleTapUp(e2);
+            } else if (isRightSwipe(deltaX, deltaY)) {
+                waitUntilNextDown = true;
+                if (mSwipeListener != null) {
+                    mSwipeListener.onSwipeRight(null);
+                }
+                return true;
             }
+            return onSingleTapUp(e2);
         }
 
         private boolean isLeftSwipe(int orientation, int deltaX, int deltaY) {
             switch (orientation) {
                 case 90:
-                    return deltaY > 0 && Math.abs(deltaY) > 2 * Math.abs(deltaX);
+                    return deltaY > mSwipeThreshold && Math.abs(deltaY) > 2 * Math.abs(deltaX);
                 case 180:
-                    return deltaX > 0 && Math.abs(deltaX) > 2 * Math.abs(deltaY);
+                    return deltaX > mSwipeThreshold && Math.abs(deltaX) > 2 * Math.abs(deltaY);
                 case 270:
-                    return deltaY < 0 && Math.abs(deltaY) > 2 * Math.abs(deltaX);
+                    return deltaY < -mSwipeThreshold && Math.abs(deltaY) > 2 * Math.abs(deltaX);
                 default:
-                    return deltaX < 0 && Math.abs(deltaX) > 2 * Math.abs(deltaY);
+                    return deltaX < -mSwipeThreshold && Math.abs(deltaX) > 2 * Math.abs(deltaY);
             }
+        }
+
+        private boolean isRightSwipe(int deltaX, int deltaY) {
+            return deltaX > mSwipeThreshold && Math.abs(deltaX) > 2 * Math.abs(deltaY);
         }
     };
 
@@ -124,17 +140,31 @@ public class PreviewGestures
         public void onSingleTapUp(View v, int x, int y);
     }
 
+    public interface SwipeListener {
+        public void onSwipeLeft(View v);
+
+        public void onSwipeRight(View v);
+    }
+
     public PreviewGestures(CameraActivity ctx, SingleTapListener tapListener,
                            ZoomRenderer zoom, PieRenderer pie, TrackingFocusRenderer trackingfocus) {
-        mTapListener = tapListener;
-        mPie = pie;
-        mTrackingFocus = trackingfocus;
-        mZoom = zoom;
-        mMode = MODE_NONE;
-        mScale = new ScaleGestureDetector(ctx, this);
-        mEnabled = true;
-        mGestureDetector = new GestureDetector(mGestureListener);
+        this(ctx, tapListener, null, zoom, pie, trackingfocus);
     }
+
+    public PreviewGestures(CameraActivity ctx, SingleTapListener tapListener,
+                           SwipeListener swipeListener, ZoomRenderer zoom, PieRenderer pie,
+                           TrackingFocusRenderer trackingfocus) {
+       mSwipeThreshold = ctx.getResources().getDisplayMetrics().density * 25;
+       mTapListener = tapListener;
+       mSwipeListener = swipeListener;
+       mPie = pie;
+       mTrackingFocus = trackingfocus;
+       mZoom = zoom;
+       mMode = MODE_NONE;
+       mScale = new ScaleGestureDetector(ctx, this);
+       mEnabled = true;
+       mGestureDetector = new GestureDetector(mGestureListener);
+   }
 
     public void setRenderOverlay(RenderOverlay overlay) {
         mOverlay = overlay;
