@@ -80,6 +80,7 @@ public class VideoMenu extends MenuController
     private int mSceneStatus;
     private View mFrontBackSwitcher;
     private View mFilterModeSwitcher;
+    private View mGridSwitcher;
     private int mPopupStatus;
     private int mPreviewMenuStatus;
     private CameraActivity mActivity;
@@ -99,6 +100,7 @@ public class VideoMenu extends MenuController
         mActivity = activity;
         mFrontBackSwitcher = ui.getRootView().findViewById(R.id.front_back_switcher);
         mFilterModeSwitcher = ui.getRootView().findViewById(R.id.filter_mode_switcher);
+        mGridSwitcher = ui.getRootView().findViewById(R.id.grid_switcher);
     }
 
     public void initialize(PreferenceGroup group) {
@@ -107,7 +109,11 @@ public class VideoMenu extends MenuController
         mListSubMenu = null;
         mPopupStatus = POPUP_NONE;
         mPreviewMenuStatus = POPUP_NONE;
+
         initFilterModeButton(mFilterModeSwitcher);
+        initSwitchItem(CameraSettings.KEY_CAMERA_ID, mFrontBackSwitcher);
+        initSwitchItem(CameraSettings.KEY_GRID, mGridSwitcher);
+
         // settings popup
         mOtherKeys1 = new String[] {
                 CameraSettings.KEY_VIDEOCAMERA_FLASH_MODE,
@@ -117,9 +123,9 @@ public class VideoMenu extends MenuController
                 CameraSettings.KEY_CAMERA_SAVEPATH,
                 CameraSettings.KEY_WHITE_BALANCE,
                 CameraSettings.KEY_VIDEO_HIGH_FRAME_RATE,
-                CameraSettings.KEY_DIS,
-                CameraSettings.KEY_GRID
+                CameraSettings.KEY_DIS
         };
+
         mOtherKeys2 = new String[] {
                 CameraSettings.KEY_VIDEOCAMERA_FLASH_MODE,
                 CameraSettings.KEY_VIDEO_QUALITY,
@@ -142,10 +148,8 @@ public class VideoMenu extends MenuController
                 CameraSettings.KEY_VIDEO_CDS_MODE,
                 CameraSettings.KEY_VIDEO_TNR_MODE,
                 CameraSettings.KEY_VIDEO_SNAPSHOT_SIZE,
-                CameraSettings.KEY_ZOOM,
-                CameraSettings.KEY_GRID
+                CameraSettings.KEY_ZOOM
         };
-        initSwitchItem(CameraSettings.KEY_CAMERA_ID, mFrontBackSwitcher);
     }
 
     public boolean handleBackKey() {
@@ -464,49 +468,6 @@ public class VideoMenu extends MenuController
         return mUI.sendTouchToMenu(ev);
     }
 
-    public void initSwitchItem(final String prefKey, View switcher) {
-        final IconListPreference pref =
-                (IconListPreference) mPreferenceGroup.findPreference(prefKey);
-        if (pref == null)
-            return;
-
-        int[] iconIds = pref.getLargeIconIds();
-        int resid = -1;
-        int index = pref.findIndexOfValue(pref.getValue());
-        if (!pref.getUseSingleIcon() && iconIds != null) {
-            if (index == -1) {
-                return;
-            }
-            // Each entry has a corresponding icon.
-            resid = iconIds[index];
-        } else {
-            // The preference only has a single icon to represent it.
-            resid = pref.getSingleIcon();
-        }
-        ((ImageView) switcher).setImageResource(resid);
-        mPreferences.add(pref);
-        mPreferenceMap.put(pref, switcher);
-        switcher.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                IconListPreference pref = (IconListPreference) mPreferenceGroup
-                        .findPreference(prefKey);
-                if (pref == null)
-                    return;
-                int index = pref.findIndexOfValue(pref.getValue());
-                CharSequence[] values = pref.getEntryValues();
-                index = (index + 1) % values.length;
-                pref.setValueIndex(index);
-                ((ImageView) v).setImageResource(
-                        ((IconListPreference) pref).getLargeIconIds()[index]);
-                if (prefKey.equals(CameraSettings.KEY_CAMERA_ID))
-                    mListener.onCameraPickerClicked(index);
-                reloadPreference(pref);
-                onSettingChanged(pref);
-            }
-        });
-    }
-
     public void initFilterModeButton(View button) {
         button.setVisibility(View.INVISIBLE);
         final IconListPreference pref = (IconListPreference) mPreferenceGroup
@@ -658,7 +619,7 @@ public class VideoMenu extends MenuController
     }
 
     public void openFirstLevel() {
-        if (isMenuBeingShown() || CameraControls.isAnimating())
+        if (isMenuBeingShown())
             return;
         if (mListMenu == null || mPopupStatus != POPUP_FIRST_LEVEL) {
             initializePopup();
