@@ -31,7 +31,11 @@ public class RotateLayout extends ViewGroup implements Rotatable {
     private static final String TAG = "RotateLayout";
     private int mOrientation;
     private Matrix mMatrix = new Matrix();
-    protected View mChild;
+    private View mChild;
+
+    public RotateLayout(Context context) {
+        this(context, null);
+    }
 
     public RotateLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -135,18 +139,23 @@ public class RotateLayout extends ViewGroup implements Rotatable {
 
         if (getParent() instanceof FrameLayout) {
             int diff = (orientation - mOrientation + 360) % 360;
-            if (diff == 90) {
-                RotatableLayout.rotateCounterClockwise(this);
-            } else if (diff == 180) {
-                RotatableLayout.rotateClockwise(this);
-                RotatableLayout.rotateClockwise(this);
-            } else if (diff == 270) {
-                RotatableLayout.rotateClockwise(this);
+            switch (diff) {
+                case 90:
+                    RotatableLayout.rotateCounterClockwise(this);
+                    break;
+                case 180:
+                    RotatableLayout.rotateClockwise(this);
+                    // Don't break here
+                    // Rotate a second time
+                case 270:
+                    RotatableLayout.rotateClockwise(this);
+                    break;
             }
         }
         mOrientation = orientation;
-        if (mChild != null)
+        if (mChild != null) {
             requestLayout();
+        }
     }
 
     public int getOrientation() {
