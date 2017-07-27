@@ -53,9 +53,9 @@ public class MenuController {
 
     public MenuController(Activity activity) {
         mActivity = activity;
-        mPreferences = new ArrayList<IconListPreference>();
-        mPreferenceMap = new HashMap<IconListPreference, View>();
-        mOverrides = new HashMap<IconListPreference, String>();
+        mPreferences = new ArrayList<>();
+        mPreferenceMap = new HashMap<>();
+        mOverrides = new HashMap<>();
     }
 
     public void initialize(PreferenceGroup group) {
@@ -89,8 +89,7 @@ public class MenuController {
 
     protected void reloadPreference(IconListPreference pref) {
         View switcher = mPreferenceMap.get(pref);
-        if (switcher == null)
-            return;
+        if (switcher == null || pref.getUseSingleIcon()) return;
         String overrideValue = mOverrides.get(pref);
         int index;
         if (overrideValue == null) {
@@ -105,7 +104,6 @@ public class MenuController {
             }
         }
         ((ImageView) switcher).setImageResource(pref.getLargeIconIds()[index]);
-
     }
 
     // Scene mode may override other camera settings (ex: flash mode).
