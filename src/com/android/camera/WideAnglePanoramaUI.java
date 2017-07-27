@@ -127,8 +127,7 @@ public class WideAnglePanoramaUI implements
             mThumbnail.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (!CameraControls.isAnimating())
-                        mActivity.gotoGallery();
+                    mActivity.gotoGallery();
                 }
             });
         }
@@ -136,7 +135,6 @@ public class WideAnglePanoramaUI implements
         mSwitcher.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mSwitcher.showPopup();
                 mSwitcher.setOrientation(mOrientation, false);
             }
         });
@@ -164,7 +162,6 @@ public class WideAnglePanoramaUI implements
     }
 
     public void hideSwitcher() {
-        mSwitcher.closePopup();
         mSwitcher.setVisibility(View.INVISIBLE);
     }
 
@@ -389,7 +386,7 @@ public class WideAnglePanoramaUI implements
         int r = mTextureView.getRight();
         int b2 = mTextureView.getBottom();
 
-        mCameraControls.setPreviewRatio(1.0f, true);
+        mCameraControls.setTransparency(false);
     }
 
     public void resetSavingProgress() {
@@ -470,7 +467,7 @@ public class WideAnglePanoramaUI implements
         mShutterButton.setImageResource(R.drawable.btn_new_shutter);
         mShutterButton.setOnShutterButtonListener(this);
         // Hide menu and indicators.
-        mRootView.findViewById(R.id.menu).setVisibility(View.GONE);
+        mRootView.findViewById(R.id.settings).setVisibility(View.GONE);
         mRootView.findViewById(R.id.on_screen_indicators).setVisibility(View.GONE);
         mReview.setBackgroundColor(mReviewBackground);
 
@@ -609,14 +606,6 @@ public class WideAnglePanoramaUI implements
             canvas.restore();
         }
     }
-
-    public boolean hideSwitcherPopup() {
-        if (mSwitcher != null && mSwitcher.showsPopup()) {
-            mSwitcher.closePopup();
-            return true;
-        }
-        return false;
-   }
 
     public void setOrientation(int orientation, boolean animation) {
         mOrientation = orientation;
