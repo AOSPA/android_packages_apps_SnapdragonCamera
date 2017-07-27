@@ -1292,10 +1292,6 @@ public class WideAnglePanoramaModule
     }
 
     @Override
-    public void onShowSwitcherPopup() {
-    }
-
-    @Override
     public void onMediaSaveServiceConnected(MediaSaveService s) {
         // do nothing.
     }
