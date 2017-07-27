@@ -531,8 +531,7 @@ public class PhotoModule
                 }
 
                 case SWITCH_CAMERA_START_ANIMATION: {
-                    // TODO: Need to revisit
-                    // ((CameraScreenNail) mActivity.mCameraScreenNail).animateSwitchCamera();
+                    mUI.animateSurfaceViewFlip();
                     break;
                 }
 
@@ -595,21 +594,21 @@ public class PhotoModule
     public void init(CameraActivity activity, View parent) {
         mActivity = activity;
         mRootView = parent;
-        mPreferences = ComboPreferences.get(mActivity);
+        mPreferences = ComboPreferences.get(activity);
         if (mPreferences == null) {
-            mPreferences = new ComboPreferences(mActivity);
+            mPreferences = new ComboPreferences(activity);
         }
 
         CameraSettings.upgradeGlobalPreferences(mPreferences.getGlobal(), activity);
         mCameraId = getPreferredCameraId(mPreferences);
-        mContentResolver = mActivity.getContentResolver();
+        mContentResolver = activity.getContentResolver();
         mApplicationContext = CameraApp.getContext();
 
         // Surface texture is from camera screen nail and startPreview needs it.
         // This must be done before startPreview.
         mIsImageCaptureIntent = isImageCaptureIntent();
 
-        mPreferences.setLocalId(mActivity, mCameraId);
+        mPreferences.setLocalId(activity, mCameraId);
         CameraSettings.upgradeLocalPreferences(mPreferences.getLocal());
 
         mUI = new PhotoUI(activity, this, parent);
@@ -618,14 +617,12 @@ public class PhotoModule
             mOpenCameraThread.start();
         }
         initializeControlByIntent();
-        mQuickCapture = mActivity.getIntent().getBooleanExtra(EXTRA_QUICK_CAPTURE, false);
-        mLocationManager = new LocationManager(mActivity, this);
-        mSensorManager = (SensorManager)(mActivity.getSystemService(Context.SENSOR_SERVICE));
+        mQuickCapture = activity.getIntent().getBooleanExtra(EXTRA_QUICK_CAPTURE, false);
+        mLocationManager = new LocationManager(activity, this);
+        mSensorManager = (SensorManager) activity.getSystemService(Context.SENSOR_SERVICE);
 
-        mUI.getCameraControls().setCameraActivity(mActivity);
-
-        brightnessProgressBar = (ProgressBar)mRootView.findViewById(R.id.progress);
-        mBlurDegreeProgressBar = (SeekBar)mRootView.findViewById(R.id.blur_degree_bar);
+        brightnessProgressBar = (ProgressBar) parent.findViewById(R.id.progress);
+        mBlurDegreeProgressBar = (SeekBar) parent.findViewById(R.id.blur_degree_bar);
         mBlurDegreeProgressBar.setOnSeekBarChangeListener(mBlurDegreeListener);
         mBlurDegreeProgressBar.setMax(100);
         if (brightnessProgressBar instanceof SeekBar) {
@@ -647,7 +644,7 @@ public class PhotoModule
             mUseAbsoluteSharpness = mApplicationContext.getResources().getBoolean(R.bool.config_use_absolute_sharpness);
         }
 
-        mActivity.showGrid(mPreferences);
+        activity.showGrid(mPreferences);
     }
 
     private void initializeControlByIntent() {
@@ -982,8 +979,8 @@ public class PhotoModule
         }
 
         mNamedImages = new NamedImages();
-        mGraphView = (GraphView)mRootView.findViewById(R.id.graph_view);
-        mDrawAutoHDR = (DrawAutoHDR )mRootView.findViewById(R.id.autohdr_view);
+        mGraphView = (GraphView) mRootView.findViewById(R.id.graph_view);
+        mDrawAutoHDR = (DrawAutoHDR) mRootView.findViewById(R.id.autohdr_view);
         if (mGraphView == null || mDrawAutoHDR == null){
             Log.e(TAG, "mGraphView or mDrawAutoHDR is null");
         } else{
@@ -1202,8 +1199,9 @@ public class PhotoModule
             }
             mActivity.runOnUiThread(new Runnable() {
                 public void run() {
-                    if(mGraphView != null)
+                    if (mGraphView != null) {
                         mGraphView.PreviewChanged();
+                    }
                 }
            });
         }
@@ -1813,8 +1811,9 @@ public class PhotoModule
             }
             mActivity.runOnUiThread(new Runnable() {
                 public void run() {
-                    if(mGraphView != null)
+                    if (mGraphView != null) {
                         mGraphView.setVisibility(View.INVISIBLE);
+                    }
                 }
             });
         }
@@ -2292,7 +2291,7 @@ public class PhotoModule
         }
 
         // need to re-initialize mGraphView to show histogram on rotate
-        mGraphView = (GraphView)mRootView.findViewById(R.id.graph_view);
+        mGraphView = (GraphView) mRootView.findViewById(R.id.graph_view);
         if(mGraphView != null){
             mGraphView.setAlpha(0.75f);
             mGraphView.setPhotoModuleObject(this);
@@ -2924,7 +2923,8 @@ public class PhotoModule
         }
         // Check if metering area or focus area is supported.
         if (!mFocusAreaSupported && !mMeteringAreaSupported) return;
-        if (! mFocusManager.getPreviewRect().contains(x, y)) return;
+        if (!mFocusManager.getPreviewRect().contains(x, y)) return;
+        mFocusManager.setCameraControlHeight(mUI.getControlHeight());
         mFocusManager.onSingleTapUp(x, y);
     }
 
@@ -3772,14 +3772,14 @@ public class PhotoModule
                 + mInstantCaptureSnapShot);
         mParameters.set(CameraSettings.KEY_QC_INSTANT_CAPTURE, instantCapture);
 
-        //Set Histogram
+        // Set Histogram
         String histogram = mPreferences.getString(
                 CameraSettings.KEY_HISTOGRAM,
                 mActivity.getString(R.string.pref_camera_histogram_default));
         if (CameraUtil.isSupported(histogram,
             mParameters.getSupportedHistogramModes()) && mCameraDevice != null) {
             // Call for histogram
-            if(histogram.equals("enable")) {
+            if (histogram.equals("enable")) {
                 mActivity.runOnUiThread(new Runnable() {
                     public void run() {
                         if(mGraphView != null) {
@@ -5044,11 +5044,6 @@ public class PhotoModule
         mFocusManager.onShutterUp();
         mUI.overrideSettings(CameraSettings.KEY_ZSL, null);
         mUI.showUIAfterCountDown();
-    }
-
-    @Override
-    public void onShowSwitcherPopup() {
-        mUI.onShowSwitcherPopup();
     }
 
     @Override

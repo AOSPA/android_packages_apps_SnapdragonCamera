@@ -132,7 +132,7 @@ public class PhotoMenu extends MenuController
         mSceneModeSwitcher = ui.getRootView().findViewById(R.id.scene_mode_switcher);
         mFilterModeSwitcher = ui.getRootView().findViewById(R.id.filter_mode_switcher);
         mMakeupListener = makeupListener;
-        mSettingMenu = ui.getRootView().findViewById(R.id.menu);
+        mSettingMenu = ui.getRootView().findViewById(R.id.settings);
         mCameraSwitcher = ui.getRootView().findViewById(R.id.camera_switcher);
         mPreviewThumbnail = ui.getRootView().findViewById(R.id.preview_thumb);
     }
@@ -553,13 +553,6 @@ public class PhotoMenu extends MenuController
 
     private void buttonSetEnabled(View v, boolean enable) {
         v.setEnabled(enable);
-        if (v instanceof ViewGroup) {
-            View v2 = ((ViewGroup) v).getChildAt(0);
-            if (v2 != null)
-                v2.setEnabled(enable);
-
-        }
-
     }
 
     public boolean isOverMenu(MotionEvent ev) {
@@ -776,7 +769,6 @@ public class PhotoMenu extends MenuController
 
         if ((autohdr != null) && autohdr.equals("enable")) {
             mHdrSwitcher.setVisibility(View.GONE);
-            mUI.getCameraControls().removeFromViewList(mHdrSwitcher);
         } else {
             mHdrSwitcher.setVisibility(View.VISIBLE);
         }
@@ -1246,7 +1238,7 @@ public class PhotoMenu extends MenuController
     }
 
     public void openFirstLevel() {
-        if (isMenuBeingShown() || CameraControls.isAnimating()) {
+        if (isMenuBeingShown()) {
             return;
         }
         if(TsMakeupManager.HAS_TS_MAKEUP) {
@@ -1489,7 +1481,6 @@ public class PhotoMenu extends MenuController
         ListPreference autoHdrPref = mPreferenceGroup.findPreference(CameraSettings.KEY_AUTO_HDR);
         if (autoHdrPref != null && autoHdrPref.getValue().equalsIgnoreCase("enable")) {
             mHdrSwitcher.setVisibility(View.GONE);
-            mUI.getCameraControls().removeFromViewList(mHdrSwitcher);
         } else {
             mHdrSwitcher.setVisibility(View.VISIBLE);
         }
