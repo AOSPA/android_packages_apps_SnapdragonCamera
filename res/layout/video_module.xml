@@ -21,8 +21,7 @@
     <FrameLayout
         android:id="@+id/preview_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="center_vertical|center_horizontal" >
+        android:layout_height="match_parent" >
         <SurfaceView
             android:id="@+id/mdp_preview_content"
             android:layout_width="match_parent"
