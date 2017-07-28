@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "edbf8309_d42c8fc3",
+        "filename": "src/com/android/camera/PreviewGestures.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 1000007
+      },
+      "writtenOn": "2017-07-28T15:07:48Z",
+      "side": 1,
+      "message": "move to dimens",
+      "revId": "d36851f9e19d04be24dc486e30fdb53b14904bd7",
+      "serverId": "3162e3d8-d894-470e-abd9-724f7b0effad",
+      "unresolved": false
+    }
+  ]
+}
