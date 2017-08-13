@@ -161,7 +161,7 @@ public class MediaSaveService extends Service {
         t.execute();
     }
 
-    public void addXmpImage(byte[] mainImage, GImage bayer, GDepth gDepth,
+    public void addClearsightImage(byte[] clearsight, GImage bayer, GDepth.DepthMap depthMap,
                                    String title, long date, Location loc, int width, int height,
                                    int orientation, ExifInterface exif,
                                    OnMediaSavedListener l, ContentResolver resolver, String pictureFormat) {
@@ -169,11 +169,11 @@ public class MediaSaveService extends Service {
             Log.e(TAG, "Cannot add image when the queue is full");
             return;
         }
-        XmpImageSaveTask t = new XmpImageSaveTask(mainImage, bayer, gDepth,
+        ClearsightImageSaveTask t = new ClearsightImageSaveTask(clearsight, bayer, depthMap,
                 title, date,  (loc == null) ? null : new Location(loc),
                 width, height, orientation, exif, resolver, l, pictureFormat);
 
-        mMemoryUse += mainImage.length;
+        mMemoryUse += clearsight.length;
         if (isQueueFull()) {
             onQueueFull();
         }
@@ -382,9 +382,11 @@ public class MediaSaveService extends Service {
         }
     }
 
-    private class XmpImageSaveTask extends AsyncTask <Void, Void, Uri> {
-        private byte[] mainImage;
+    private class ClearsightImageSaveTask extends AsyncTask <Void, Void, Uri> {
+        private byte[] clearsight;
+        private byte[] depth;
         private GImage bayer;
+        private GDepth.DepthMap depthMap;
         private GDepth gDepth;
         private byte[] data;
         private String title;
@@ -397,14 +399,14 @@ public class MediaSaveService extends Service {
         private OnMediaSavedListener listener;
         private String pictureFormat;
 
-        public XmpImageSaveTask(byte[] mainImage, GImage bayer, GDepth gDepth,
-                                String title, long date, Location loc,
-                                int width, int height, int orientation,
-                                ExifInterface exif, ContentResolver resolver,
-                                OnMediaSavedListener listener, String pictureFormat) {
-            this.mainImage = mainImage;
-            this.gDepth = gDepth;
+        public ClearsightImageSaveTask(byte[] clearsight, GImage bayer,GDepth.DepthMap depthMap,
+                                       String title, long date, Location loc,
+                                       int width, int height, int orientation,
+                                       ExifInterface exif, ContentResolver resolver,
+                                       OnMediaSavedListener listener, String pictureFormat) {
+            this.clearsight = clearsight;
             this.bayer = bayer;
+            this.depthMap = depthMap;
             this.title = title;
             this.date = date;
             this.loc = loc;
@@ -415,6 +417,8 @@ public class MediaSaveService extends Service {
             this.resolver = resolver;
             this.listener = listener;
             this.pictureFormat = pictureFormat;
+
+            gDepth = null;
         }
 
         @Override
@@ -424,9 +428,13 @@ public class MediaSaveService extends Service {
 
         @Override
         protected Uri doInBackground(Void... v) {
-            data = embedGDepthAndBayerInClearSight(mainImage);
+            if ( depthMap != null ) {
+                depthMap.buffer = converToJpegByte(depthMap.rawDepth, depthMap.width, depthMap.height);
+                gDepth = GDepth.createGDepth(depthMap);
+            }
+            data = embedGDepthAndBayerInClearSight(clearsight);
             if ( data == null ) {
-                data = mainImage;
+                data = clearsight;
                 Log.e(TAG, "embedGDepthAndBayerInClearSight fail");
             }
 
@@ -450,6 +458,22 @@ public class MediaSaveService extends Service {
             if (isQueueFull() != previouslyFull) onQueueAvailable();
         }
 
+        private byte[] converToJpegByte(byte[] depthBuf, int width, int height) {
+            int[] colors = new int[depthBuf.length];
+            for(int i=0; i < colors.length; ++i) {
+                colors[i] =  (256+depthBuf[i])%256;
+            }
+            Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            for( int y=0; y < height; ++y ) {
+                for( int x=0; x < width; ++x) {
+                    int c = colors[y*width+x];
+                    bitmap.setPixel(x, y, Color.rgb(c, c, c));
+                }
+            }
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+            return baos.toByteArray();
+        }
 
         private byte[] embedGDepthAndBayerInClearSight(byte[] clearSightImageBytes) {
             Log.d(TAG, "embedGDepthInClearSight");
