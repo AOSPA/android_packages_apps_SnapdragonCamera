@@ -1,0 +1,174 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b874f5e3_5d2bac17",
+        "filename": "src/com/android/camera/ui/CameraControlsSettings.java",
+        "patchSetId": 33
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1000007
+      },
+      "writtenOn": "2017-09-02T09:56:11Z",
+      "side": 1,
+      "message": "spaces",
+      "revId": "c2e39775c2b0057db5081eec9ebcd8335b30db69",
+      "serverId": "3162e3d8-d894-470e-abd9-724f7b0effad",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a53c5a1_b2f16043",
+        "filename": "src/com/android/camera/ui/CameraControlsSettings.java",
+        "patchSetId": 33
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1000007
+      },
+      "writtenOn": "2017-09-02T09:56:11Z",
+      "side": 1,
+      "message": "spaces",
+      "revId": "c2e39775c2b0057db5081eec9ebcd8335b30db69",
+      "serverId": "3162e3d8-d894-470e-abd9-724f7b0effad",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fbf733e4_1755578d",
+        "filename": "src/com/android/camera/ui/CameraControlsSettings.java",
+        "patchSetId": 33
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1000007
+      },
+      "writtenOn": "2017-09-02T09:56:11Z",
+      "side": 1,
+      "message": "spaces",
+      "revId": "c2e39775c2b0057db5081eec9ebcd8335b30db69",
+      "serverId": "3162e3d8-d894-470e-abd9-724f7b0effad",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b719d33f_cdc7e92d",
+        "filename": "src/com/android/camera/ui/RemainingPhotos.java",
+        "patchSetId": 33
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1000007
+      },
+      "writtenOn": "2017-09-02T09:56:11Z",
+      "side": 1,
+      "message": "move this to colors XML",
+      "revId": "c2e39775c2b0057db5081eec9ebcd8335b30db69",
+      "serverId": "3162e3d8-d894-470e-abd9-724f7b0effad",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2418bdb7_fc6ba8c3",
+        "filename": "src/com/android/camera/ui/RemainingPhotos.java",
+        "patchSetId": 33
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1000007
+      },
+      "writtenOn": "2017-09-02T09:56:11Z",
+      "side": 1,
+      "message": "spaces",
+      "revId": "c2e39775c2b0057db5081eec9ebcd8335b30db69",
+      "serverId": "3162e3d8-d894-470e-abd9-724f7b0effad",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "33508d9c_43c5d69d",
+        "filename": "src/com/android/camera/ui/RemainingPhotos.java",
+        "patchSetId": 33
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1000007
+      },
+      "writtenOn": "2017-09-02T09:56:11Z",
+      "side": 1,
+      "message": "spaces",
+      "revId": "c2e39775c2b0057db5081eec9ebcd8335b30db69",
+      "serverId": "3162e3d8-d894-470e-abd9-724f7b0effad",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5805c5d4_1c70327b",
+        "filename": "src/com/android/camera/ui/RemainingPhotos.java",
+        "patchSetId": 33
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1000007
+      },
+      "writtenOn": "2017-09-02T09:56:11Z",
+      "side": 1,
+      "message": "spaces",
+      "revId": "c2e39775c2b0057db5081eec9ebcd8335b30db69",
+      "serverId": "3162e3d8-d894-470e-abd9-724f7b0effad",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b654726b_cd820e12",
+        "filename": "src/com/android/camera/ui/RemainingPhotos.java",
+        "patchSetId": 33
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1000007
+      },
+      "writtenOn": "2017-09-02T09:56:11Z",
+      "side": 1,
+      "message": "spaces",
+      "revId": "c2e39775c2b0057db5081eec9ebcd8335b30db69",
+      "serverId": "3162e3d8-d894-470e-abd9-724f7b0effad",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "631549ee_eb3fd37c",
+        "filename": "src/com/android/camera/ui/RemainingPhotos.java",
+        "patchSetId": 33
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1000007
+      },
+      "writtenOn": "2017-09-02T09:56:11Z",
+      "side": 1,
+      "message": "spaces",
+      "revId": "c2e39775c2b0057db5081eec9ebcd8335b30db69",
+      "serverId": "3162e3d8-d894-470e-abd9-724f7b0effad",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "00d51331_0446f9bf",
+        "filename": "src/com/android/camera/ui/RemainingPhotos.java",
+        "patchSetId": 33
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1000007
+      },
+      "writtenOn": "2017-09-02T09:56:11Z",
+      "side": 1,
+      "message": "spaces",
+      "revId": "c2e39775c2b0057db5081eec9ebcd8335b30db69",
+      "serverId": "3162e3d8-d894-470e-abd9-724f7b0effad",
+      "unresolved": false
+    }
+  ]
+}
